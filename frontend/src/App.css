@@ -1,0 +1,37 @@
+/* พื้นหลัง */
+.app {
+  min-height: 100vh;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* NAVBAR */
+.header {
+  width: 100%;
+  height: 65px;
+  background: #1C1C1C;
+  backdrop-filter: blur(5px);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  margin-bottom: 10px;
+}
+
+.logo-img {
+  height: 40px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 25px;
+  margin-left: 40px;
+}
+.nav-menu a {
+  color: #B0B0B0;
+  text-decoration: none;
+}
+
+
