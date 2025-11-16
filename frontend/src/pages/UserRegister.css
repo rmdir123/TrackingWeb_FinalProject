@@ -1,0 +1,154 @@
+/* ======== หลักของหน้านี้เท่านั้น ======== */
+
+.register-app {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background-color: #000;
+  color: white;
+  --bg-image: none;
+}
+
+/* NAVBAR ตรงนี้แยกจาก adminhome */
+.header {
+  height: 60px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: #181818cc;
+}
+
+.nav-logo .logo-img {
+  height: 40px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 28px;
+  margin-left: 40px;
+}
+
+.nav-menu a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.nav-menu a:hover {
+  text-decoration: underline;
+}
+
+.nav-auth {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-auth-link {
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-auth-link.active {
+  color: #ff4d4f;
+  font-weight: 700;
+}
+
+.sep {
+  color: #999;
+}
+
+/* ------- ตัวเนื้อหา ------- */
+/* ให้ส่วนใต้ navbar แบ่งเป็น 2 คอลัมน์ */
+.register-content {
+  display: flex;
+  height: calc(100vh - 60px);   /* 60 = ความสูง header ถ้าไม่ตรงปรับได้ */
+}
+
+/* PANEL ซ้าย */
+.register-left {
+  width: 35%;                   /* panel แค่ฝั่งซ้าย */
+  min-width: 360px;
+  background: #3a3a3a;
+  position: relative;
+  display: flex;
+  align-items: center;          /* จัดฟอร์มให้กลางแนวตั้งของ panel */
+}
+
+/* กล่องฟอร์มข้างใน panel */
+.reg-box {
+  width: 80%;                   /* ให้กิน 80% ของ panel */
+  max-width: 480px;
+  margin: 0 auto;               /* กลางแนวนอนใน panel */
+}
+
+/* ลูกศรย้อนกลับบนซ้ายของ panel */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+/* หัวข้อ + sub */
+.reg-title {
+  margin: 0 0 8px 0;
+  font-size: 32px;
+  text-align: center;
+}
+
+.reg-sub {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  text-align: center;
+}
+
+/* ฟอร์ม */
+.reg-form {
+  width: 100%;
+}
+
+.reg-field {
+  margin-bottom: 20px;
+}
+
+.reg-field label {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.reg-field input {
+  width: 100%;
+  border-radius: 22px;
+  border: none;
+  padding: 10px 16px;
+  outline: none;
+}
+
+/* ปุ่มอยู่กลางใต้ฟอร์ม */
+.reg-submit {
+  display: block;
+  margin: 8px auto 0 auto;
+  padding: 10px 32px;
+  border-radius: 22px;
+  border: none;
+  background: #f5f5f5;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* PANEL ขวา: รูปพื้นหลังรถ */
+.register-right {
+  flex: 1;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4);
+}

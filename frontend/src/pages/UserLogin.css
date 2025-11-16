@@ -1,0 +1,177 @@
+/* โครงหลักของหน้า Login */
+.login-app {
+  width: 100%;
+  height: 100vh;
+  background-color: #000;
+  color: #fff;
+}
+
+/* NAVBAR เหมือนหน้า Register */
+.header {
+  height: 60px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: #181818cc;
+}
+
+.nav-logo .logo-img {
+  height: 40px;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 28px;
+  margin-left: 40px;
+}
+
+.nav-menu a {
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+}
+
+.nav-menu a:hover {
+  text-decoration: underline;
+}
+
+.nav-auth {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-auth-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.nav-auth-link:hover {
+  text-decoration: underline;
+}
+
+.nav-auth-active {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+.nav-auth-sep {
+  color: #ffffff;
+  font-size: 14px;
+}
+
+/* CONTENT แบ่งสองฝั่ง */
+.login-content {
+  display: flex;
+  height: calc(100vh - 60px);
+}
+
+/* panel ซ้าย */
+.login-left {
+  width: 35%;
+  min-width: 360px;
+  background: #3a3a3a;
+  position: relative;
+  display: flex;
+  align-items: center;   /* ให้ box อยู่กลางแนวตั้ง */
+}
+
+/* ปุ่มย้อนกลับ */
+.back-btn {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-size: 26px;
+  cursor: pointer;
+}
+
+/* กล่องฟอร์ม */
+.login-box {
+  width: 80%;
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.login-title {
+  margin: 0 0 8px 0;
+  font-size: 28px;
+  text-align: left;
+}
+
+.login-sub {
+  margin: 0 0 24px 0;
+  font-size: 14px;
+  text-align: left;
+}
+
+/* ฟอร์ม */
+.login-form {
+  width: 100%;
+}
+
+.login-field {
+  margin-bottom: 18px;
+}
+
+.login-field label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.login-field input {
+  width: 100%;
+  border-radius: 22px;
+  border: none;
+  padding: 10px 16px;
+  outline: none;
+}
+
+/* ลิงก์ลืมรหัสผ่าน */
+.forgot-link {
+  background: transparent;
+  border: none;
+  color: #ff4d4f;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 18px;
+}
+
+/* ปุ่ม Login */
+.login-submit {
+  display: block;
+  margin: 0 auto;
+  padding: 10px 32px;
+  border-radius: 22px;
+  border: none;
+  background: #f5f5f5;
+  color: #000;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.login-submit:hover {
+  filter: brightness(0.92);
+}
+
+/* panel ขวา = รูปพื้นหลัง */
+.login-right {
+  flex: 1;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4);
+}
+
+.login-error {
+  color: #ff4d4f;
+  font-size: 13px;
+  margin-bottom: 12px;
+}
