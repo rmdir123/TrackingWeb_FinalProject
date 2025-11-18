@@ -8,6 +8,12 @@
   background-attachment: fixed;
 }
 
+/* กัน body มี margin ขาว ๆ รอบจอ */
+body {
+  margin: 0;
+}
+
+/* NAVBAR */
 /* NAVBAR */
 .header {
   width: 100%;
@@ -16,22 +22,98 @@
   backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  justify-content: space-between;
+  padding: 0 24px;
+  box-sizing: border-box;
   margin-bottom: 10px;
+
+  /* ⭐ เพิ่ม 3 บรรทัดนี้ */
+  position: sticky;   /* หรือจะใช้ fixed ก็ได้ แต่ sticky สบายกว่า */
+  top: 0;
+  z-index: 1000;
 }
+
 
 .logo-img {
   height: 40px;
 }
 
+/* กลุ่มเมนูหลัก */
 .nav-menu {
   display: flex;
   gap: 25px;
-  margin-left: 40px;
+  margin-left: 32px;
 }
+
 .nav-menu a {
   color: #B0B0B0;
   text-decoration: none;
 }
 
+/* กลุ่มด้านขวา (Register/Login หรือ Username/Logout) */
+.nav-auth {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
 
+/* ลิงก์ Register / Login */
+.nav-auth-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.nav-auth-link:hover {
+  text-decoration: underline;
+}
+
+.nav-auth-active {
+  color: #ff4d4f;
+  font-weight: 600;
+}
+
+/* ตัวคั่น | */
+.nav-auth-sep {
+  color: #888888;
+  font-size: 14px;
+  margin: 0 6px;
+}
+
+/* ========== ตอนล็อกอินแล้ว ========== */
+
+.nav-user-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.nav-user-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 18px;
+  width: 18px;
+}
+
+.nav-username {
+  color: #f0f0f0;
+  font-size: 14px;
+}
+
+/* Logout เป็นลิงก์สีแดง */
+.nav-logout-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 14px;
+  color: #ff4d4f;
+  cursor: pointer;
+}
+
+.nav-logout-btn:hover {
+  text-decoration: underline;
+}

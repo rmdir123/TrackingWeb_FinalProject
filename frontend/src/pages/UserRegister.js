@@ -7,6 +7,8 @@ import weblogo from "../images/weblogo.png";
 import bg from "../images/bg.png";
 import axios from "axios";
 
+import Navbar from "../components/Navbar";
+
 function UserRegister() {
   const navigate = useNavigate();
   const [form, setForm] = useState({
@@ -65,23 +67,7 @@ function UserRegister() {
       }}
     >
       {/* NAVBAR */}
-      <header className="header">
-        <div className="nav-logo">
-          <img src={weblogo} alt="Logo" className="logo-img" />
-        </div>
-
-        <nav className="nav-menu">
-          <Link to="/">Home</Link>
-          <Link to="/user_history">History</Link>
-          <Link to="/">About Us</Link>
-        </nav>
-
-        <div className="nav-auth">
-          <Link to="/register" className="nav-auth-link active">Register</Link>
-          <span className="sep">|</span>
-          <Link to="/login" className="nav-auth-link">Login</Link>
-        </div>
-      </header>
+      <Navbar />
       
       <main className="register-content">
         {/* ฝั่งซ้าย: panel ฟอร์ม */}

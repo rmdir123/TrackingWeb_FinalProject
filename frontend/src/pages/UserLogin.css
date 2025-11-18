@@ -6,62 +6,6 @@
   color: #fff;
 }
 
-/* NAVBAR เหมือนหน้า Register */
-.header {
-  height: 60px;
-  width: 100%;
-  display: flex;
-  align-items: center;
-  padding: 0 24px;
-  background: #181818cc;
-}
-
-.nav-logo .logo-img {
-  height: 40px;
-}
-
-.nav-menu {
-  display: flex;
-  gap: 28px;
-  margin-left: 40px;
-}
-
-.nav-menu a {
-  color: #fff;
-  text-decoration: none;
-  font-size: 15px;
-}
-
-.nav-menu a:hover {
-  text-decoration: underline;
-}
-
-.nav-auth {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.nav-auth-link {
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.nav-auth-link:hover {
-  text-decoration: underline;
-}
-
-.nav-auth-active {
-  color: #ff4d4f;
-  font-weight: 600;
-}
-
-.nav-auth-sep {
-  color: #ffffff;
-  font-size: 14px;
-}
 
 /* CONTENT แบ่งสองฝั่ง */
 .login-content {
@@ -174,4 +118,22 @@
   color: #ff4d4f;
   font-size: 13px;
   margin-bottom: 12px;
+}
+
+
+
+
+
+
+
+/* navbar fix color */
+.header .nav-auth-link {
+  color: #ffffff;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.header .nav-auth-link.nav-auth-active {
+  color: #ff4d4f;
+  font-weight: 600;
 }

@@ -1,0 +1,124 @@
+/* พื้นหลังหน้าประวัติ */
+.history-page {
+  min-height: calc(100vh - 65px); /* หักความสูง header */
+  padding: 24px;
+  box-sizing: border-box;
+  color: #ffffff;
+
+  /* ⭐ สำคัญที่สุด → ทำให้พื้นหลังโปร่งใส */
+  background: transparent !important;
+}
+
+/* หัวข้อหน้า */
+.history-title {
+  margin: 0 0 4px 0;
+  font-size: 24px;
+}
+
+.history-subtitle {
+  margin: 0 0 16px 0;
+  font-size: 14px;
+  color: #cccccc;
+}
+
+.history-info {
+  font-size: 14px;
+  color: #cccccc;
+}
+
+.history-error {
+  font-size: 14px;
+  color: #ff4d4f;
+}
+
+/* กล่องครอบ list ที่ scroll ได้ */
+.history-list-wrapper {
+  margin-top: 12px;
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+/* ตกแต่ง scrollbar */
+.history-list-wrapper::-webkit-scrollbar {
+  width: 6px;
+}
+
+.history-list-wrapper::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.history-list-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px;
+}
+
+/* list ด้านใน */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* กล่องแต่ละรายการ */
+.history-item {
+  background: rgba(20, 20, 20, 0.9);  /* กล่องทึบโปร่ง ๆ */
+  border-radius: 10px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* ซ้าย: รายละเอียดหลัก */
+.history-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-row {
+  display: flex;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.history-label {
+  min-width: 70px;
+  color: #aaaaaa;
+}
+
+.history-value {
+  color: #ffffff;
+}
+
+/* ขวา: เวลา + ปุ่มลบ */
+.history-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.history-time {
+  font-size: 12px;
+  color: #bbbbbb;
+}
+
+/* ปุ่มลบ */
+.history-delete-btn {
+  margin-top: 8px;
+  padding: 4px 10px;
+  font-size: 12px;
+  border-radius: 12px;
+  border: 1px solid #ff4d4f;
+  background: transparent;
+  color: #ff4d4f;
+  cursor: pointer;
+}
+
+.history-delete-btn:hover {
+  background: #ff4d4f;
+  color: #ffffff;
+}

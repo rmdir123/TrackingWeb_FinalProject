@@ -7,6 +7,8 @@ import "./AdminHome.css";
 import bg from "../images/bg.png";
 import weblogo from "../images/weblogo.png";
 
+import Navbar from "../components/Navbar";
+
 // ฟอร์แมตวันที่-เวลา
 const formatDateTime = (dt) => {
   if (!dt) return "-";
@@ -55,29 +57,49 @@ function AdminHome() {
   }, []);
 
   // ค้นหา package ตาม ID
-  const handleSearch = async (e) => {
-    e.preventDefault();
+  // ค้นหา package ตาม ID
+const handleSearch = async (e) => {
+  e.preventDefault();
 
-    const id = searchId.trim();
-    if (!id) return;
+  const id = searchId.trim();
+  if (!id) return;
 
-    try {
-      setSearchError("");
-      setSearchResult(null);
+  try {
+    setSearchError("");
+    setSearchResult(null);
 
-      const res = await axios.get(
-        `http://localhost:5000/api/v1/packages/${id}`
-      );
+    // ดึง token จาก localStorage
+    const token = localStorage.getItem("token");
 
-      if (!res.data) {
-        setSearchError("ไม่พบข้อมูลพัสดุที่ค้นหา");
-      } else {
-        setSearchResult(res.data);
-      }
-    } catch (err) {
+    // ถ้ามี token → ใช้ /secure/... + ส่ง Authorization
+    // ถ้าไม่มี token → ใช้ /packages/... ปกติ
+    const url = token
+      ? `http://localhost:5000/api/v1/secure/packages/${id}`
+      : `http://localhost:5000/api/v1/packages/${id}`;
+
+    const headers = token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
+
+    const res = await axios.get(url, { headers });
+
+    if (!res.data) {
+      setSearchError("ไม่พบข้อมูลพัสดุที่ค้นหา");
+    } else {
+      setSearchResult(res.data);
+    }
+  } catch (err) {
+    console.error(err);
+    if (err.response?.status === 404) {
+      setSearchError("ไม่พบข้อมูลพัสดุที่ค้นหา");
+    } else if (err.response?.status === 401) {
+      setSearchError("ไม่มีสิทธิ์เข้าถึง (กรุณาเข้าสู่ระบบใหม่)");
+    } else {
       setSearchError("ไม่พบข้อมูลพัสดุ หรือเกิดข้อผิดพลาด");
     }
-  };
+  }
+};
+
 
   return (
     <div
@@ -87,17 +109,7 @@ function AdminHome() {
       }}
     >
       {/* NAVBAR */}
-      <header className="header">
-        <div className="nav-logo">
-          <img src={weblogo} alt="Logo" className="logo-img" />
-        </div>
-
-        <nav className="nav-menu">
-          <Link to="/">Home</Link>
-          <Link to="/user_history">History</Link>
-          <Link to="/">About Us</Link>
-        </nav>
-      </header>
+      <Navbar />
 
       <main className="content">
 

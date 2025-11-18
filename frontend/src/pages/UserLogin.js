@@ -1,11 +1,12 @@
 // src/pages/UserLogin.js
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom"; 
 import axios from "axios";                    // <--- เพิ่ม
 import "./UserLogin.css";
 
 import weblogo from "../images/weblogo.png";
 import bg from "../images/bg.png";
+import Navbar from "../components/Navbar";   
 
 // แก้ URL ให้ตรงกับ Swagger ของมึง
 const LOGIN_URL = "http://localhost:5000/api/v1/auth/login";
@@ -78,27 +79,7 @@ function UserLogin() {
       }}
     >
       {/* NAVBAR */}
-      <header className="header">
-        <div className="nav-logo">
-          <img src={weblogo} alt="Logo" className="logo-img" />
-        </div>
-
-        <nav className="nav-menu">
-          <Link to="/">Home</Link>
-          <Link to="/user_history">History</Link>
-          <Link to="/">About Us</Link>
-        </nav>
-
-        <div className="nav-auth">
-          <Link to="/register" className="nav-auth-link">
-            Register
-          </Link>
-          <span className="nav-auth-sep">|</span>
-          <Link to="/login" className="nav-auth-link nav-auth-active">
-            Login
-          </Link>
-        </div>
-      </header>
+      <Navbar />
 
       {/* CONTENT */}
       <main className="login-content">
