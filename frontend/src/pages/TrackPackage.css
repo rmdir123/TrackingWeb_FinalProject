@@ -1,0 +1,234 @@
+/* ครอบทั้งหน้า + พื้นหลัง */
+.track-app {
+  min-height: 100vh;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* โครงหลักของหน้า TrackPackage */
+.trackpage-wrapper {
+  min-height: calc(100vh - 65px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  box-sizing: border-box;
+}
+
+/* กล่อง search ด้านบน */
+.trackpage-search-box {
+  width: min(800px, 90%);
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+  background: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.trackpage-search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 18px;
+  padding-right: 12px;
+  background: transparent;
+}
+
+.trackpage-search-btn {
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ข้อความ error / hint */
+.trackpage-error {
+  margin-top: 16px;
+  color: #ffb3b3;
+  background: rgba(0, 0, 0, 0.7);
+  padding: 8px 18px;
+  border-radius: 8px;
+}
+
+.trackpage-hint {
+  margin-top: 24px;
+  color: #f0f0f0;
+  background: rgba(0, 0, 0, 0.6);
+  padding: 10px 18px;
+  border-radius: 8px;
+}
+
+/* ชั้นนอกสุด: กล่องดำโปร่ง ๆ */
+.trackpage-result-shell {
+  margin-top: 24px;
+  width: min(1100px, 95%);
+  background: rgba(61, 59, 59, 0.8); /* ดำโปร่ง */
+  border-radius: 16px;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* ปุ่มย้อนกลับ ← */
+.trackpage-back-btn {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 26px;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 10px;
+}
+
+
+/* ชั้นใน: กล่องเทาที่ครอบทั้งรูป + ข้อความ */
+.trackpage-result-box {
+  background: #000000;      /* เทาเข้มแบบตัวอย่าง */
+  border-radius: 12px;
+  padding: 24px 28px;
+  display: flex;
+  gap: 28px;
+  box-sizing: border-box;
+  color: #ffffff; /* ← เปลี่ยนตัวอักษรในกล่องเทาให้เป็นสีขาว */
+}
+/* ฝั่งซ้าย: รูป */
+.trackpage-left {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* กล่องครอบรูป (พื้นเป็นเทาอ่อน / ดำก็ได้แล้วแต่) */
+.trackpage-image-frame {
+  width: 100%;
+  max-width: 420px;
+  height: 260px;
+  background: #2b2b2b;
+  border-radius: 10px;
+  overflow: hidden;
+  padding: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.trackpage-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ฝั่งขวาเหมือนเดิม */
+.trackpage-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.trackpage-package-id {
+  margin-top: 10px;
+  font-size: 16px;
+}
+
+
+/* สถานะปัจจุบัน */
+.trackpage-status-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.trackpage-status-label {
+  font-weight: 600;
+}
+
+.trackpage-status-value {
+  font-weight: 500;
+}
+
+.trackpage-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ffc93c;
+  margin-left: 6px;
+}
+
+.trackpage-status-note {
+  color: #ffc93c;
+}
+
+/* block ผู้ส่ง / ผู้รับ */
+.trackpage-section {
+  margin-bottom: 14px;
+}
+
+.trackpage-section-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+/* ปุ่มรายละเอียดพัสดุด้านล่างขวา */
+.trackpage-detail-row {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.trackpage-detail-btn {
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.trackpage-detail-btn:hover {
+  text-decoration: underline;
+}
+
+/* ทำให้ใช้งานได้ดีบนจอแคบ */
+@media (max-width: 900px) {
+  .trackpage-result-box {
+    flex-direction: column;
+  }
+
+  .trackpage-left {
+    width: 100%;
+  }
+}
+
+/* กล่อง Not Found */
+.trackpage-notfound-box {
+  background: #3a3a3a;
+  width: 100%;
+  height: 350px;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+}
+
+/* รูป Not Found */
+.trackpage-notfound-img {
+  width: 120px;
+  height: auto;
+}
+
+/* ข้อความ Not Found */
+.trackpage-notfound-text {
+  color: #ffffff;
+  font-size: 20px;
+  font-weight: 500;
+  margin-top: 10px;
+}

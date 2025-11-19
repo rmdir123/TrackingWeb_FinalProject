@@ -1,0 +1,63 @@
+import React, { useState } from "react";
+import "./UserHome.css";
+
+import bg from "../images/bg.png";
+import Navbar from "../components/Navbar";
+import { useNavigate } from "react-router-dom";
+
+function UserHome() {
+  const navigate = useNavigate();
+  const [trackingId, setTrackingId] = useState("");
+
+  const handleSearch = () => {
+    if (!trackingId.trim()) return;
+    navigate(`/track/${trackingId.trim()}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") handleSearch();
+  };
+
+  return (
+    <div
+      className="userhome-app"
+      style={{
+        "--bg-image": `url(${bg})`,
+      }}
+    >
+      <Navbar />
+
+      <main className="userhome-wrapper">
+        {/* ช่อง search */}
+        <div className="userhome-search-box">
+          <input
+            type="text"
+            placeholder="กรอก Package ID เพื่อค้นหา"
+            value={trackingId}
+            onChange={(e) => setTrackingId(e.target.value)}
+            onKeyDown={handleKeyDown}
+          />
+          <button className="userhome-search-btn" onClick={handleSearch}>
+            🔍
+          </button>
+        </div>
+
+        {/* เนื้อหาเดิม */}
+        <div className="userhome-content">
+          <p>
+            ระบบติดตามพัสดุ CM-EXPRESS ช่วยให้คุณสามารถตรวจสอบสถานะการจัดส่งของพัสดุ
+            ได้แบบเรียลไทม์ เพียงกรอกหมายเลข Package ID ของคุณในช่องค้นหาด้านบน
+            ก็จะทราบได้ทันทีว่าพัสดุอยู่ที่จุดใดระหว่างการขนส่ง
+          </p>
+          <p>
+            หากคุณมีหลายพัสดุจากการส่งครั้งเดียว แนะนำให้บันทึกหมายเลข Package ID ไว้
+            เพื่อความสะดวกในการติดตามภายหลัง และในอนาคตระบบจะเชื่อมต่อกับประวัติการค้นหา
+            ของคุณ ทำให้กลับมาดูรายการเดิมได้ง่ายขึ้น โดยไม่ต้องกรอกเลขใหม่ทุกครั้ง
+          </p>
+        </div>
+      </main>
+    </div>
+  );
+}
+
+export default UserHome;

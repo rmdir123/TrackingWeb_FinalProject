@@ -1,0 +1,57 @@
+/* ครอบทั้งหน้า + พื้นหลัง */
+.userhome-app {
+  min-height: 100vh;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* พื้นที่เนื้อหาหลัง navbar */
+.userhome-wrapper {
+  min-height: calc(100vh - 65px); /* หักความสูง navbar ถ้า header สูง 65px */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 40px;
+  padding-bottom: 40px;
+  box-sizing: border-box;
+}
+
+/* กล่อง search */
+.userhome-search-box {
+  width: min(800px, 90%);
+  display: flex;
+  align-items: center;
+  padding: 14px 24px;
+  background: #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+}
+
+.userhome-search-box input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 18px;
+  padding-right: 12px;
+  background: transparent;
+}
+
+.userhome-search-btn {
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+/* ข้อความอธิบายด้านล่าง */
+.userhome-content {
+  width: min(900px, 90%);
+  margin-top: 40px;
+  color: #ffffff;
+  font-size: 14px;
+  line-height: 1.7;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}

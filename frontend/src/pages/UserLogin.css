@@ -1,3 +1,5 @@
+/* ========= หน้า Login ========= */
+
 /* โครงหลักของหน้า Login */
 .login-app {
   width: 100%;
@@ -6,21 +8,20 @@
   color: #fff;
 }
 
-
 /* CONTENT แบ่งสองฝั่ง */
 .login-content {
   display: flex;
-  height: calc(100vh - 60px);
+  height: calc(100vh - 60px); /* 60 = สูง navbar */
 }
 
-/* panel ซ้าย */
+/* Panel ซ้าย (กล่องฟอร์ม) */
 .login-left {
   width: 35%;
   min-width: 360px;
   background: #3a3a3a;
   position: relative;
   display: flex;
-  align-items: center;   /* ให้ box อยู่กลางแนวตั้ง */
+  align-items: center; /* ให้ box กลางแนวตั้ง */
 }
 
 /* ปุ่มย้อนกลับ */
@@ -30,9 +31,15 @@
   left: 24px;
   background: transparent;
   border: none;
-  color: #fff;
+  color: #ffffff;
   font-size: 26px;
   cursor: pointer;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.back-btn:hover {
+  color: #ff4d4d;
+  transform: translateX(-2px);
 }
 
 /* กล่องฟอร์ม */
@@ -42,16 +49,20 @@
   margin: 0 auto;
 }
 
+/* หัวข้อ */
 .login-title {
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   font-size: 28px;
+  font-weight: 600;
   text-align: left;
 }
 
+/* ข้อความอธิบาย */
 .login-sub {
   margin: 0 0 24px 0;
   font-size: 14px;
   text-align: left;
+  color: #e1e1e1;
 }
 
 /* ฟอร์ม */
@@ -59,6 +70,7 @@
   width: 100%;
 }
 
+/* แต่ละ field */
 .login-field {
   margin-bottom: 18px;
 }
@@ -75,37 +87,50 @@
   border: none;
   padding: 10px 16px;
   outline: none;
+  font-size: 14px;
+  background: #f0f0f0;
+  color: #000000;
 }
 
 /* ลิงก์ลืมรหัสผ่าน */
-.forgot-link {
-  background: transparent;
-  border: none;
-  color: #ff4d4f;
-  font-size: 13px;
+.forgot-password span {
+  color: #ff4d4d;        /* สีแดงตามธีม */
   cursor: pointer;
-  padding: 0;
-  margin-bottom: 18px;
+  transition: 0.2s ease;
 }
+
+.forgot-password span:hover {
+  color: #ff6b6b;        /* แดงอ่อนขึ้นเวลา hover */
+  text-decoration: underline;
+}
+
 
 /* ปุ่ม Login */
 .login-submit {
   display: block;
   margin: 0 auto;
-  padding: 10px 32px;
-  border-radius: 22px;
+  padding: 12px 36px;
+  border-radius: 24px;
   border: none;
   background: #f5f5f5;
   color: #000;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
 .login-submit:hover {
-  filter: brightness(0.92);
+  background: #e6e6e6;
+  box-shadow: 0 0 8px rgba(255, 77, 77, 0.45);
+  transform: translateY(-1px);
 }
 
-/* panel ขวา = รูปพื้นหลัง */
+.login-submit:active {
+  transform: translateY(0);
+  box-shadow: 0 0 4px rgba(255, 77, 77, 0.4);
+}
+
+/* Panel ขวา = รูปพื้นหลัง */
 .login-right {
   flex: 1;
   background-image: var(--bg-image);
@@ -114,26 +139,9 @@
   filter: brightness(0.4);
 }
 
+/* ข้อความ error */
 .login-error {
   color: #ff4d4f;
   font-size: 13px;
   margin-bottom: 12px;
-}
-
-
-
-
-
-
-
-/* navbar fix color */
-.header .nav-auth-link {
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.header .nav-auth-link.nav-auth-active {
-  color: #ff4d4f;
-  font-weight: 600;
 }

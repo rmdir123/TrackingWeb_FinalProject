@@ -139,6 +139,17 @@ function UserHistory() {
             <div className="history-list">
               {history.map((item) => (
                 <div key={item.history_id} className="history-item">
+                  {/* ⭐ กล่องรูปภาพพัสดุ ถ้ามี image_url */}
+                  {item.image_url && (
+                    <div className="history-image-wrapper">
+                      <img
+                        src={item.image_url}
+                        alt={`พัสดุเลขที่ ${item.package_id}`}
+                        className="history-image"
+                      />
+                    </div>
+                  )}
+
                   <div className="history-main">
                     <div className="history-row">
                       <span className="history-label">พัสดุเลขที่</span>

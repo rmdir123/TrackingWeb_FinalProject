@@ -60,23 +60,39 @@
   gap: 10px;
 }
 
-/* กล่องแต่ละรายการ */
+/* กล่องรายการแต่ละอัน */
 .history-item {
-  background: rgba(20, 20, 20, 0.9);  /* กล่องทึบโปร่ง ๆ */
+  background: rgba(20, 20, 20, 0.9);
   border-radius: 10px;
-  padding: 12px 16px;
+  padding: 16px;
   display: flex;
-  justify-content: space-between;
-  gap: 12px;
+  align-items: flex-start;
+  gap: 16px; /* ← ระยะห่างระหว่างรูปกับรายละเอียด */
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* ซ้าย: รายละเอียดหลัก */
+/* กล่องรูปภาพ */
+.history-image-wrapper {
+  flex: 0 0 160px;   /* ความกว้างมาตรฐาน 16:9 */
+}
+
+/* ปรับรูปเป็นผืนผ้า 16:9 */
+.history-image {
+  width: 160px;      /* กว้าง */
+  height: 120px;      /* สูง (16:9) */
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #333;
+}
+
+/* กล่องข้อมูล */
 .history-main {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 4px;          /* ระยะห่างระหว่างแถว */
 }
+
 
 .history-row {
   display: flex;

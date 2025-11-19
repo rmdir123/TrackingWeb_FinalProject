@@ -1,0 +1,146 @@
+/* src/pages/UserInfo.css */
+
+.userinfo-overlay {
+  width: 100%;
+  height: calc(100vh - 60px);
+  display: flex;
+  align-items: flex-start;      /* จาก center → เลื่อนขึ้นบน */
+  justify-content: center;
+  margin-top: 50px;             /* เว้นจาก navbar 50px */
+}
+
+.userinfo-card {
+  position: relative;
+  width: 640px;
+  max-width: 95%;
+  background: rgba(40, 40, 40, 0.96);
+  border-radius: 8px;
+  padding: 32px 40px 28px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.85);
+}
+
+/* ปุ่มย้อนกลับมุมซ้ายบน */
+.userinfo-back-btn {
+  position: absolute;
+  top: 14px;
+  left: 16px;
+  border: none;
+  background: transparent;
+  font-size: 22px;
+  color: #f5f5f5;
+  cursor: pointer;
+}
+
+.userinfo-title {
+  margin: 0 0 28px 0;
+  text-align: center;
+  font-size: 28px;
+  color: #f5f5f5;
+}
+
+/* กลุ่ม field */
+.userinfo-group {
+  margin-bottom: 18px;
+}
+
+.userinfo-label {
+  display: block;
+  font-size: 14px;
+  color: #e5e5e5;
+  margin-bottom: 4px;
+}
+
+/* ค่าแบบอ่านอย่างเดียว */
+.userinfo-static {
+  display: inline-block;
+  padding: 6px 0;
+  font-size: 14px;
+  color: #f8f8f8;
+}
+
+.userinfo-username {
+  color: #ff4d4d; /* ชื่อสีแดงตามรูป */
+}
+
+/* แถว password + ปุ่ม change */
+.userinfo-pass-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* ช่องกรอก */
+.userinfo-input {
+  width: 100px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: none;
+  outline: none;
+  background: #3a3a3a;
+  color: #f5f5f5;
+  font-size: 14px;
+}
+
+.userinfo-input::placeholder {
+  color: #a0a0a0;
+}
+
+/* ปุ่ม change */
+.userinfo-change-btn {
+  padding: 5px 16px;
+  border-radius: 999px;
+  border: none;
+  background: #e5e5e5;
+  color: #222;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.userinfo-change-btn:hover {
+  background: #ffffff;
+}
+
+/* ปุ่ม save ด้านล่างขวา */
+.userinfo-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 22px;
+}
+
+.userinfo-save-btn {
+  padding: 7px 28px;
+  border-radius: 999px;
+  border: none;
+  background: #ff4d4d;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+  text-transform: lowercase;
+}
+
+.userinfo-save-btn:hover {
+  background: #ff6666;
+}
+
+.userinfo-save-btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+/* สถานะ / error / success */
+.userinfo-status {
+  text-align: center;
+  color: #f5f5f5;
+}
+
+.userinfo-error {
+  font-size: 13px;
+  color: #ff4d4d;
+  margin-bottom: 6px;
+}
+
+.userinfo-success {
+  font-size: 13px;
+  color: #7fd77f;
+  margin-bottom: 6px;
+}

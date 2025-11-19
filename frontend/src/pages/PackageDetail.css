@@ -1,0 +1,174 @@
+.detail-app {
+  min-height: 100vh;
+  background-image: var(--bg-image);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+/* ครอบทั้งกล่อง detail */
+.detail-wrapper {
+  min-height: calc(100vh - 65px);
+  padding: 30px 0 40px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* ปุ่มย้อนกลับ */
+.detail-back-btn {
+  position: absolute;
+  top: 12px;     /* อยู่ในแถบดำด้านบน */
+  left: 24px;
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 10;
+}
+
+.detail-card-shell {
+  position: relative;
+  width: min(1150px, 96%);
+  background: rgba(0, 0, 0, 0.9);
+  border-radius: 18px;
+  padding: 18px;
+  box-sizing: border-box;
+}
+
+/* ให้กล่องเทาเลื่อนลงมาหน่อย จะได้เหลือแถบดำด้านบน */
+.detail-card {
+  background: #3a3a3a;
+  border-radius: 14px;
+  padding: 24px 26px 20px;
+  box-sizing: border-box;
+  color: #ffffff;
+  margin-top: 24px;   /* 👈 เพิ่มบรรทัดนี้ */
+}
+
+/* layout หลัก */
+.detail-top-row {
+  display: grid;
+  grid-template-columns: 2fr 3fr 1.7fr;
+  gap: 24px;
+}
+
+/* รูป */
+.detail-left {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.detail-img-frame {
+  width: 100%;
+  background: #2b2b2b;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+
+.detail-img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+.detail-package-id {
+  margin-top: 4px;
+}
+
+/* ขวากลาง */
+.detail-right {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.detail-status-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.detail-status-label {
+  font-weight: 600;
+}
+
+.detail-status-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: #ffc93c;
+  margin: 0 4px;
+}
+
+.detail-status-note {
+  color: #ffc93c;
+  font-weight: 500;
+}
+
+.detail-section {
+  margin-top: 6px;
+}
+
+.detail-section-title {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.detail-subtitle {
+  margin-top: 6px;
+  font-weight: 500;
+}
+
+/* OCR text */
+.detail-ocr-text {
+  margin-top: 4px;
+  white-space: pre-wrap;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+/* คอลัมน์ขวาสุด - meta data */
+.detail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+
+.detail-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+/* ด้านล่างขวา */
+.detail-bottom-row {
+  margin-top: 16px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.detail-back-to-track {
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.detail-back-to-track:hover {
+  text-decoration: underline;
+}
+
+/* loading / error */
+.detail-loading,
+.detail-error {
+  color: #ffffff;
+  margin-top: 20px;
+}

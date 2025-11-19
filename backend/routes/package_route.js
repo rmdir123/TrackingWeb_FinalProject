@@ -54,7 +54,7 @@ function s(v) {
  *
  * components:
  *   securitySchemes:
- *     BearerAuth:
+ *     bearerAuth:
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
@@ -500,7 +500,7 @@ router.get('/package/ocrfail', (req, res) => {
  *     summary: (system manager) ดึงพัสดุทั้งหมดที่ถูกแก้ไข (modify_by != null)
  *     description: การดูพัสดุที่ถูกแก้ไขโดย admin ต้องเข้าสู่ระบบและมีสิทธิ์เป็น system manager
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: สำเร็จ — รายการพัสดุที่ถูกแก้ไข
@@ -609,7 +609,7 @@ router.get('/packages/:id', (req, res) => {
  *     tags: [Package]
  *     summary: (login user) ดึงข้อมูลพัสดุตาม ID + บันทึก History (ต้องส่ง Bearer JWT)
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

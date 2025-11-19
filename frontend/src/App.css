@@ -14,25 +14,22 @@ body {
 }
 
 /* NAVBAR */
-/* NAVBAR */
 .header {
   width: 100%;
   height: 65px;
-  background: #1C1C1C;
+  background: #1c1c1c;
   backdrop-filter: blur(5px);
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   box-sizing: border-box;
-  margin-bottom: 10px;
+  /* margin-bottom: 10px; */
 
-  /* ⭐ เพิ่ม 3 บรรทัดนี้ */
-  position: sticky;   /* หรือจะใช้ fixed ก็ได้ แต่ sticky สบายกว่า */
+  position: sticky;
   top: 0;
   z-index: 1000;
 }
-
 
 .logo-img {
   height: 40px;
@@ -46,8 +43,15 @@ body {
 }
 
 .nav-menu a {
-  color: #B0B0B0;
+  color: #e0e0e0;
   text-decoration: none;
+  margin: 0 14px;
+  transition: 0.25s ease;
+}
+
+.nav-menu a:hover {
+  color: #ff4d4d;
+  text-shadow: 0 0 6px rgba(255, 77, 77, 0.55);
 }
 
 /* กลุ่มด้านขวา (Register/Login หรือ Username/Logout) */
@@ -59,7 +63,7 @@ body {
   font-size: 14px;
 }
 
-/* ลิงก์ Register / Login */
+/* ลิงก์ Register / Login พื้นฐาน */
 .nav-auth-link {
   color: #ffffff;
   text-decoration: none;
@@ -70,9 +74,14 @@ body {
   text-decoration: underline;
 }
 
-.nav-auth-active {
-  color: #ff4d4f;
+/* REGISTER = แดงตลอด */
+.nav-auth-register {
+  color: #ff4d4d !important;
   font-weight: 600;
+}
+
+.nav-auth-register:hover {
+  color: #ff6b6b !important;
 }
 
 /* ตัวคั่น | */
@@ -110,10 +119,33 @@ body {
   padding: 0;
   margin: 0;
   font-size: 14px;
-  color: #ff4d4f;
+  color: #ff4d4d;
   cursor: pointer;
 }
 
 .nav-logout-btn:hover {
   text-decoration: underline;
 }
+
+/* ทำให้ username เป็นลิงก์กดได้ */
+.nav-username-link {
+  cursor: pointer;
+  color: #fff;
+  text-decoration: none;
+}
+
+.nav-username-link:hover {
+  text-decoration: underline;
+}
+
+/* Hover มืดสำหรับ Register / Login */
+.nav-auth-link:hover,
+.nav-auth-register:hover {
+  color: #cfcfcf !important;   /* ขาวหม่น */
+  text-shadow: none;
+  background: rgba(0, 0, 0, 0.25); /* มืดลง */
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: 0.2s ease;
+}
+

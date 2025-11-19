@@ -1,54 +1,60 @@
-/* ======== หลักของหน้านี้เท่านั้น ======== */
+/* ========= หน้า Register ========= */
 
 .register-app {
   width: 100%;
   height: 100vh;
   overflow: hidden;
   background-color: #000;
-  color: white;
+  color: #ffffff;
   --bg-image: none;
 }
 
-/* ------- ตัวเนื้อหา ------- */
-/* ให้ส่วนใต้ navbar แบ่งเป็น 2 คอลัมน์ */
+/* เนื้อหาหลัง navbar แบ่งสองคอลัมน์ */
 .register-content {
   display: flex;
-  height: calc(100vh - 60px);   /* 60 = ความสูง header ถ้าไม่ตรงปรับได้ */
+  height: calc(100vh - 60px); /* 60 = สูง header */
 }
 
-/* PANEL ซ้าย */
+/* Panel ซ้าย (ฟอร์มสมัคร) */
 .register-left {
-  width: 35%;                   /* panel แค่ฝั่งซ้าย */
+  width: 35%;
   min-width: 360px;
   background: #3a3a3a;
   position: relative;
   display: flex;
-  align-items: center;          /* จัดฟอร์มให้กลางแนวตั้งของ panel */
+  align-items: center; /* จัดฟอร์มกลางแนวตั้ง */
 }
 
 /* กล่องฟอร์มข้างใน panel */
 .reg-box {
-  width: 80%;                   /* ให้กิน 80% ของ panel */
+  width: 80%;
   max-width: 480px;
-  margin: 0 auto;               /* กลางแนวนอนใน panel */
+  margin: 0 auto;
 }
 
-/* ลูกศรย้อนกลับบนซ้ายของ panel */
+/* ปุ่มย้อนกลับ */
 .back-btn {
   position: absolute;
   top: 20px;
   left: 24px;
   background: transparent;
   border: none;
-  color: #fff;
+  color: #ffffff;
   font-size: 26px;
   cursor: pointer;
+  transition: color 0.2s ease, transform 0.15s ease;
+}
+
+.back-btn:hover {
+  color: #ff4d4d;
+  transform: translateX(-2px);
 }
 
 /* หัวข้อ + sub */
 .reg-title {
-  margin: 0 0 8px 0;
+  margin: 0 0 6px 0;
   font-size: 32px;
+  font-weight: 600;
   text-align: center;
 }
 
@@ -56,6 +62,7 @@
   margin: 0 0 24px 0;
   font-size: 14px;
   text-align: center;
+  color: #e1e1e1;
 }
 
 /* ฟอร์ม */
@@ -63,6 +70,7 @@
   width: 100%;
 }
 
+/* แต่ละ field */
 .reg-field {
   margin-bottom: 20px;
 }
@@ -70,6 +78,7 @@
 .reg-field label {
   display: block;
   margin-bottom: 4px;
+  font-size: 14px;
 }
 
 .reg-field input {
@@ -78,42 +87,41 @@
   border: none;
   padding: 10px 16px;
   outline: none;
+  font-size: 14px;
+  background: #f0f0f0;
+  color: #000000;
 }
 
-/* ปุ่มอยู่กลางใต้ฟอร์ม */
+/* ปุ่ม Register */
 .reg-submit {
   display: block;
-  margin: 8px auto 0 auto;
-  padding: 10px 32px;
-  border-radius: 22px;
+  margin: 10px auto 0 auto;
+  padding: 12px 36px;
+  border-radius: 24px;
   border: none;
   background: #f5f5f5;
   color: #000;
   font-weight: 600;
   cursor: pointer;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
 }
 
-/* PANEL ขวา: รูปพื้นหลังรถ */
+.reg-submit:hover {
+  background: #e6e6e6;
+  box-shadow: 0 0 8px rgba(255, 77, 77, 0.45);
+  transform: translateY(-1px);
+}
+
+.reg-submit:active {
+  transform: translateY(0);
+  box-shadow: 0 0 4px rgba(255, 77, 77, 0.4);
+}
+
+/* Panel ขวา: รูปพื้นหลังรถ */
 .register-right {
   flex: 1;
   background-image: var(--bg-image);
   background-size: cover;
   background-position: center;
   filter: brightness(0.4);
-}
-
-
-
-
-
-/* navbar fix color */
-.header .nav-auth-link {
-  color: #ffffff;
-  text-decoration: none;
-  font-size: 14px;
-}
-
-.header .nav-auth-link.nav-auth-active {
-  color: #ff4d4f;
-  font-weight: 600;
 }
