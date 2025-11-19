@@ -12,7 +12,7 @@ const router = express.Router();
  *
  * components:
  *   securitySchemes:
- *     BearerAuth:
+ *     bearerAuth:
  *       type: http
  *       scheme: bearer
  *       bearerFormat: JWT
@@ -87,7 +87,7 @@ const router = express.Router();
  *     summary: ดึงรายการประวัติการค้นพัสดุของผู้ใช้ปัจจุบัน
  *     description: คืนค่ารายการพัสดุที่ผู้ใช้เคยกดดู (เช็คผู้ใช้จาก JWT)  อัพเดตเรียงตามเวลาล่าสุดก่อน
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     responses:
  *       200:
  *         description: ดึงข้อมูลสำเร็จ
@@ -110,20 +110,35 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
+// ดึงประวัติการค้นหาพัสดุของ user คนนั้น + รูปพัสดุ
 router.get('/history', requireAuth, (req, res) => {
   const sql = `
-    SELECT h.history_id, h.package_id, h.search_time,
-           p.sender_name, p.receiver_name, p.status, p.province, p.post_code
+    SELECT 
+      h.history_id,
+      h.package_id,
+      h.search_time,
+      p.sender_name,
+      p.receiver_name,
+      p.status,
+      p.province,
+      p.post_code,
+      p.package_img AS image_url  
     FROM History h
     LEFT JOIN Package p ON h.package_id = p.package_id
     WHERE h.user_id = ?
     ORDER BY datetime(h.search_time) DESC
   `;
+
   db.all(sql, [req.user.user_id], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
+    if (err) {
+      console.error("GET /history error:", err.message);
+      return res.status(500).json({ error: err.message });
+    }
     res.json(rows);
   });
 });
+
+
 
 // /**
 //  * @swagger
@@ -133,7 +148,7 @@ router.get('/history', requireAuth, (req, res) => {
 //  *     summary: เพิ่มประวัติว่าเคยค้นหาพัสดุ
 //  *     description: บันทึกว่า user เคยค้นหาพัสดุนั้น (จาก JWT)
 //  *     security:
-//  *       - BearerAuth: []
+//  *       - bearerAuth: []
 //  *     requestBody:
 //  *       required: true
 //  *       content:
@@ -185,7 +200,7 @@ router.post('/history', requireAuth, (req, res) => {
  *     summary: ลบประวัติการค้นของตัวผู้ใช้เอง
  *     description: ลบรายการประวัติด้วย history_id เฉพาะของผู้ใช้ที่เข้าสู่ระบบเท่านั้น
  *     security:
- *       - BearerAuth: []
+ *       - bearerAuth: []
  *     parameters:
  *       - in: path
  *         name: id

@@ -32,8 +32,8 @@ function Navbar() {
   };
 
   const isLoginPage = location.pathname === "/login";
-  const isRegisterPage = location.pathname === "/register";
-  const isAuthPage = isLoginPage || isRegisterPage;
+  const isAuthPage =
+    isLoginPage || location.pathname === "/register";
 
   return (
     <header className="header">
@@ -43,49 +43,58 @@ function Navbar() {
 
       <nav className="nav-menu">
         <Link to="/">Home</Link>
-        <Link to="/user_history">History</Link>
-        <Link to="/">About Us</Link>
+        <Link to="/userhistory">History</Link>
+        <Link to="/aboutus">About Us</Link>
       </nav>
 
       <div className="nav-auth">
-        {/* ถ้าเป็นหน้า login/register → บังคับให้โชว์ Register/Login ตลอด */}
         {isAuthPage ? (
+          // อยู่หน้า login หรือ register → โชว์ปุ่ม Register/ Login เหมือนเดิม
           <>
+            {/* Register = แดงตลอด */}
             <Link
               to="/register"
-              className={`nav-auth-link ${
-                isRegisterPage ? "nav-auth-active" : ""
-              }`}
+              className="nav-auth-link nav-auth-register"
             >
               Register
             </Link>
+
             <span className="nav-auth-sep">|</span>
+
+            {/* Login = ขาวตลอด */}
             <Link
               to="/login"
-              className={`nav-auth-link ${
-                isLoginPage ? "nav-auth-active" : ""
-              }`}
+              className="nav-auth-link"
             >
               Login
             </Link>
           </>
         ) : user ? (
-          // หน้าอื่น + มี user (ล็อกอินอยู่) → โชว์ icon + username + | + logout
+          // ล็อกอินแล้ว → แสดงชื่อ + logout
           <div className="nav-user-wrapper">
             <img src={userIcon} alt="User" className="nav-user-icon" />
-            <span className="nav-username">{user.username}</span>
+            <Link to="/userinfo" className="nav-username nav-username-link">
+              {user.username}
+            </Link>
             <span className="nav-auth-sep">|</span>
             <span className="nav-logout-btn" onClick={handleLogout}>
               Logout
             </span>
           </div>
         ) : (
-          // หน้าอื่น + ยังไม่ล็อกอิน → โชว์ Register / Login
+          // ยังไม่ล็อกอิน + ไม่ได้อยู่หน้า login/register
           <>
-            <Link to="/register" className="nav-auth-link">
+            {/* Register = แดงตลอด */}
+            <Link
+              to="/register"
+              className="nav-auth-link nav-auth-register"
+            >
               Register
             </Link>
+
             <span className="nav-auth-sep">|</span>
+
+            {/* Login = ขาวตลอด */}
             <Link to="/login" className="nav-auth-link">
               Login
             </Link>

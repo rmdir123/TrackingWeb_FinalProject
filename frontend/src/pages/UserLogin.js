@@ -1,12 +1,12 @@
 // src/pages/UserLogin.js
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; 
-import axios from "axios";                    // <--- เพิ่ม
+import { useNavigate } from "react-router-dom";
+import axios from "axios"; // <--- เพิ่ม
 import "./UserLogin.css";
 
 import weblogo from "../images/weblogo.png";
 import bg from "../images/bg.png";
-import Navbar from "../components/Navbar";   
+import Navbar from "../components/Navbar";
 
 // แก้ URL ให้ตรงกับ Swagger ของมึง
 const LOGIN_URL = "http://localhost:5000/api/v1/auth/login";
@@ -120,13 +120,11 @@ function UserLogin() {
                 />
               </div>
 
-              <button
-                type="button"
-                className="forgot-link"
-                onClick={() => alert("ฟีเจอร์ลืมรหัสผ่านยังไม่ได้ทำจ้า")}
-              >
-                ลืมรหัสผ่าน?
-              </button>
+              <p className="forgot-password ">
+                <span onClick={() => navigate("/resetpassword")}>
+                  ลืมรหัสผ่าน?
+                </span>
+              </p>
 
               <button type="submit" className="login-submit" disabled={loading}>
                 {loading ? "กำลังเข้าสู่ระบบ..." : "Login"}
