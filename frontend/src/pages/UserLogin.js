@@ -57,7 +57,7 @@ function UserLogin() {
       if (user?.role === "admin") {
         navigate("/admin_home");
       } else {
-        navigate("/"); // หรือหน้า user home
+        navigate("/user_home"); // หรือหน้า user home
       }
     } catch (err) {
       console.error(err);
