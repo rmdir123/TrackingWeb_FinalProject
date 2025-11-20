@@ -108,7 +108,7 @@ function UserInfo() {
   };
 
   const goChangePassword = () => {
-    navigate("/reset-password", {
+    navigate("/resetpassword", {
       state: { email: form.email },
     });
   };

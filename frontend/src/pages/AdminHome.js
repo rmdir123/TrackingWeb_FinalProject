@@ -1,9 +1,10 @@
 // src/pages/AdminHome.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import "./AdminHome.css";
+import "./TrackPackage.css"; // ⭐ ดึง style การ์ดจาก TrackPackage มาใช้ซ้ำ
 import bg from "../images/bg.png";
 import weblogo from "../images/weblogo.png";
 
@@ -21,6 +22,8 @@ const formatDateTime = (dt) => {
 };
 
 function AdminHome() {
+  const navigate = useNavigate();
+
   const [packages, setPackages] = useState([]);
   const [searchId, setSearchId] = useState("");
   const [searchResult, setSearchResult] = useState(null);
@@ -57,49 +60,51 @@ function AdminHome() {
   }, []);
 
   // ค้นหา package ตาม ID
-  // ค้นหา package ตาม ID
-const handleSearch = async (e) => {
-  e.preventDefault();
+  const handleSearch = async (e) => {
+    e.preventDefault();
 
-  const id = searchId.trim();
-  if (!id) return;
+    const id = searchId.trim();
+    if (!id) return;
 
-  try {
-    setSearchError("");
+    try {
+      setSearchError("");
+      setSearchResult(null);
+
+      // ดึง token จาก localStorage
+      const token = localStorage.getItem("token");
+
+      // ถ้ามี token → ใช้ /secure/... + ส่ง Authorization
+      // ถ้าไม่มี token → ใช้ /packages/... ปกติ
+      const url = token
+        ? `http://localhost:5000/api/v1/secure/packages/${id}`
+        : `http://localhost:5000/api/v1/packages/${id}`;
+
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      const res = await axios.get(url, { headers });
+      const data = res.data?.data || res.data;
+
+      if (!data) {
+        setSearchError("ไม่พบข้อมูลพัสดุที่ค้นหา");
+      } else {
+        setSearchResult(data);
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response?.status === 404) {
+        setSearchError("ไม่พบข้อมูลพัสดุที่ค้นหา");
+      } else if (err.response?.status === 401) {
+        setSearchError("ไม่มีสิทธิ์เข้าถึง (กรุณาเข้าสู่ระบบใหม่)");
+      } else {
+        setSearchError("ไม่พบข้อมูลพัสดุ หรือเกิดข้อผิดพลาด");
+      }
+    }
+  };
+
+  const clearSearchResult = () => {
     setSearchResult(null);
-
-    // ดึง token จาก localStorage
-    const token = localStorage.getItem("token");
-
-    // ถ้ามี token → ใช้ /secure/... + ส่ง Authorization
-    // ถ้าไม่มี token → ใช้ /packages/... ปกติ
-    const url = token
-      ? `http://localhost:5000/api/v1/secure/packages/${id}`
-      : `http://localhost:5000/api/v1/packages/${id}`;
-
-    const headers = token
-      ? { Authorization: `Bearer ${token}` }
-      : {};
-
-    const res = await axios.get(url, { headers });
-
-    if (!res.data) {
-      setSearchError("ไม่พบข้อมูลพัสดุที่ค้นหา");
-    } else {
-      setSearchResult(res.data);
-    }
-  } catch (err) {
-    console.error(err);
-    if (err.response?.status === 404) {
-      setSearchError("ไม่พบข้อมูลพัสดุที่ค้นหา");
-    } else if (err.response?.status === 401) {
-      setSearchError("ไม่มีสิทธิ์เข้าถึง (กรุณาเข้าสู่ระบบใหม่)");
-    } else {
-      setSearchError("ไม่พบข้อมูลพัสดุ หรือเกิดข้อผิดพลาด");
-    }
-  }
-};
-
+    setSearchError("");
+  };
 
   return (
     <div
@@ -112,8 +117,7 @@ const handleSearch = async (e) => {
       <Navbar />
 
       <main className="content">
-
-        {/* SEARCH BOX */}
+        {/* SEARCH BOX (เหมือนเดิม) */}
         <form className="search-box-wrapper" onSubmit={handleSearch}>
           <input
             type="text"
@@ -127,27 +131,85 @@ const handleSearch = async (e) => {
         {/* RESULT ZONE */}
         {searchError && <p className="error-text">{searchError}</p>}
 
+        {/* ⭐ แสดงผลลัพธ์แบบการ์ดเหมือนหน้า TrackPackage */}
         {searchResult && (
-          <div className="search-result-box">
-            <h3>ผลการค้นหา</h3>
+          <div className="trackpage-result-shell">
+            <button
+              className="trackpage-back-btn"
+              onClick={clearSearchResult}
+            >
+              ←
+            </button>
 
-            <div className="result-row">
-              {searchResult.package_img && (
-                <img
-                  src={searchResult.package_img}
-                  alt="package"
-                  className="result-image"
-                />
-              )}
+            <div className="trackpage-result-box">
+              {/* ซ้าย: รูป + ID */}
+              <div className="trackpage-left">
+                <div className="trackpage-image-frame">
+                  <img
+                    className="trackpage-image"
+                    src={
+                      searchResult.package_img ||
+                      searchResult.image_path ||
+                      searchResult.image_url ||
+                      "/default-package.jpg"
+                    }
+                    alt={`Package ${searchResult.package_id}`}
+                  />
+                </div>
 
-              <div>
-                <p>
-                  <b>Package ID:</b> {searchResult.package_id}
-                </p>
-                <p>ชื่อผู้ส่ง: {searchResult.sender_name}</p>
-                <p>เบอร์ผู้ส่ง: {searchResult.sender_tel}</p>
-                <p>ชื่อผู้รับ: {searchResult.receiver_name}</p>
-                <p>เบอร์ผู้รับ: {searchResult.receiver_tel}</p>
+                <div className="trackpage-package-id">
+                  Package ID : {searchResult.package_id}
+                </div>
+              </div>
+
+              {/* ขวา: รายละเอียด */}
+              <div className="trackpage-right">
+                <div className="trackpage-status-row">
+                  <span className="trackpage-status-label">
+                    สถานะปัจจุบัน :
+                  </span>
+
+                  <span className="trackpage-status-value">
+                    {searchResult.current_status || searchResult.status}
+                  </span>
+
+                  <span className="trackpage-status-dot" />
+
+                  <span className="trackpage-status-note">
+                    {searchResult.status_note}
+                  </span>
+                </div>
+
+                {/* ผู้ส่ง */}
+                <div className="trackpage-section">
+                  <div className="trackpage-section-title">ผู้ส่ง :</div>
+                  <div>{searchResult.sender_name}</div>
+                  <div>
+                    เบอร์โทรศัพท์ผู้ส่ง : {searchResult.sender_tel}
+                  </div>
+                </div>
+
+                {/* ผู้รับ */}
+                <div className="trackpage-section">
+                  <div className="trackpage-section-title">ผู้รับ :</div>
+                  <div>{searchResult.receiver_name}</div>
+                  <div>ที่อยู่ผู้รับ : {searchResult.address}</div>
+                  <div>รหัสไปรษณีย์ : {searchResult.post_code}</div>
+                  <div>
+                    เบอร์โทรศัพท์ผู้รับ : {searchResult.receiver_tel}
+                  </div>
+                </div>
+
+                <div className="trackpage-detail-row">
+                  <button
+                    className="trackpage-detail-btn"
+                    onClick={() =>
+                      navigate(`/package/${searchResult.package_id}/detail`)
+                    }
+                  >
+                    รายละเอียดพัสดุ ⬇
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -182,6 +244,8 @@ const handleSearch = async (e) => {
             ))}
           </ul>
         </div>
+
+        {/* ตาราง OCR Fail */}
         <section className="ocr-section">
           <h2 className="subtitle ocr-title">พัสดุที่มีปัญหา OCR</h2>
 
@@ -218,7 +282,6 @@ const handleSearch = async (e) => {
                       {pkg.status}
                     </td>
                     <td>
-                      {/* ปุ่มแก้ไข เฉย ๆ ยังไม่ต้องทำงาน */}
                       <button
                         type="button"
                         className="edit-btn"
