@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import "./UserHome.css";
+import "./AdminHome.css"; // 👈 ดึงดีไซน์ search-box แบบเดียวกับ AdminHome :contentReference[oaicite:0]{index=0}
 
 import bg from "../images/bg.png";
 import Navbar from "../components/Navbar";
@@ -14,8 +15,9 @@ function UserHome() {
     navigate(`/track/${trackingId.trim()}`);
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter") handleSearch();
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleSearch();
   };
 
   return (
@@ -28,24 +30,21 @@ function UserHome() {
       <Navbar />
 
       <main className="userhome-wrapper">
-        {/* ช่อง search */}
-        <div className="userhome-search-box">
+        {/* 🔍 SEARCH BAR แบบเดียวกับ AdminHome */}
+        <form className="search-box-wrapper" onSubmit={handleSubmit}>
           <input
             type="text"
-            placeholder="กรอก Package ID เพื่อค้นหา"
+            className="search-box"
+            placeholder="กรอก Package ID เพื่อค้นหา แล้วกด Enter"
             value={trackingId}
             onChange={(e) => setTrackingId(e.target.value)}
-            onKeyDown={handleKeyDown}
           />
-          <button className="userhome-search-btn" onClick={handleSearch}>
-            🔍
-          </button>
-        </div>
+        </form>
 
         {/* เนื้อหาเดิม */}
         <div className="userhome-content">
           <p>
-            ระบบติดตามพัสดุ CM-EXPRESS ช่วยให้คุณสามารถตรวจสอบสถานะการจัดส่งของพัสดุ
+            ระบบติดตามพัสดุ CN-EXPRESS ช่วยให้คุณสามารถตรวจสอบสถานะการจัดส่งของพัสดุ
             ได้แบบเรียลไทม์ เพียงกรอกหมายเลข Package ID ของคุณในช่องค้นหาด้านบน
             ก็จะทราบได้ทันทีว่าพัสดุอยู่ที่จุดใดระหว่างการขนส่ง
           </p>

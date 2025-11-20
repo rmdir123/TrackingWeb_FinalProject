@@ -67,7 +67,7 @@
 .trackpage-result-shell {
   margin-top: 24px;
   width: min(1100px, 95%);
-  background: rgba(61, 59, 59, 0.8); /* ดำโปร่ง */
+  background: #333333; /* ดำโปร่ง */
   border-radius: 16px;
   padding: 20px;
   box-sizing: border-box;
@@ -87,7 +87,7 @@
 
 /* ชั้นใน: กล่องเทาที่ครอบทั้งรูป + ข้อความ */
 .trackpage-result-box {
-  background: #000000;      /* เทาเข้มแบบตัวอย่าง */
+  background: #111111;      /* เทาเข้มแบบตัวอย่าง */
   border-radius: 12px;
   padding: 24px 28px;
   display: flex;

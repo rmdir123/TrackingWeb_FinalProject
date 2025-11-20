@@ -18,7 +18,7 @@ function formatDateTime(str) {
 }
 
 function PackageDetail() {
-  const { id } = useParams(); // /package/101/detail
+  const { id } = useParams(); // /package/:id/detail
   const navigate = useNavigate();
   const [pkg, setPkg] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -65,12 +65,17 @@ function PackageDetail() {
       >
         <Navbar />
         <div className="detail-wrapper">
-          <button className="detail-back-btn" onClick={() => navigate(-1)}>
-            ←
-          </button>
           <div className="detail-card-shell">
+            <button
+              className="detail-back-btn"
+              onClick={() => navigate(-1)}
+            >
+              ←
+            </button>
             <div className="detail-card">
-              <p className="detail-error">{error || "ไม่พบข้อมูลพัสดุ"}</p>
+              <p className="detail-error">
+                {error || "ไม่พบข้อมูลพัสดุ"}
+              </p>
             </div>
           </div>
         </div>
@@ -99,9 +104,7 @@ function PackageDetail() {
   } = pkg;
 
   const imgSrc =
-    package_img ||
-    pkg.package_img ||
-    "/default-package.jpg";
+    package_img || pkg.package_img || "/default-package.jpg";
 
   return (
     <div
@@ -111,12 +114,15 @@ function PackageDetail() {
       <Navbar />
 
       <div className="detail-wrapper">
-        
-
         <div className="detail-card-shell">
-          <button className="detail-back-btn" onClick={() => navigate(-1)}>
+          {/* ปุ่มย้อนกลับ ด้านบนซ้ายของการ์ด */}
+          <button
+            className="detail-back-btn"
+            onClick={() => navigate(-1)}
+          >
             ←
-            </button> 
+          </button>
+
           <div className="detail-card">
             <div className="detail-top-row">
               {/* ซ้าย: รูป + Package ID */}
@@ -133,7 +139,7 @@ function PackageDetail() {
                 </div>
               </div>
 
-              {/* ขวา: สถานะ + ที่อยู่ + OCR */}
+              {/* กลาง: สถานะ + รายละเอียดที่อยู่ + OCR */}
               <div className="detail-right">
                 {/* สถานะ */}
                 <div className="detail-status-row">
@@ -141,10 +147,9 @@ function PackageDetail() {
                     สถานะปัจจุบัน :
                   </span>
                   <span className="detail-status-value">
-                    {status }
+                    {status}
                   </span>
                   <span className="detail-status-dot" />
-                  
                 </div>
 
                 {/* ที่อยู่ / ผู้ส่ง-ผู้รับ */}
@@ -166,7 +171,7 @@ function PackageDetail() {
                   <div>เบอร์โทรศัพท์ผู้รับ : {receiver_tel}</div>
                 </div>
 
-                {/* OCR Result */}
+                {/* ผล OCR (ตัวอักษรเปล่า ๆ) */}
                 <div className="detail-section">
                   <div className="detail-section-title">
                     ผลการ OCR ตรวจจับตัวอักษร
@@ -209,15 +214,7 @@ function PackageDetail() {
               </div>
             </div>
 
-            {/* ปุ่มด้านล่างขวา (กลับขึ้นไปหน้า track) */}
-            <div className="detail-bottom-row">
-              <button
-                className="detail-back-to-track"
-                onClick={() => navigate(-1)}
-              >
-                กลับไปหน้าติดตามพัสดุ ↑
-              </button>
-            </div>
+            {/* ❌ เอาปุ่มด้านล่างออกแล้ว ตามที่ขอ */}
           </div>
         </div>
       </div>

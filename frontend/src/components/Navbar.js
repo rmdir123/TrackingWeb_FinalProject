@@ -9,7 +9,6 @@ function Navbar() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // อ่าน user จาก localStorage ทุกครั้งที่เปลี่ยนหน้า
   useEffect(() => {
     const stored = localStorage.getItem("user");
     if (stored) {
@@ -35,6 +34,13 @@ function Navbar() {
   const isAuthPage =
     isLoginPage || location.pathname === "/register";
 
+  // 👇 ตรงนี้คือ logic เลือกหน้า Home ตาม role
+  const homePath = user
+    ? user.role === "admin"   // ปรับ 'admin' ให้ตรงกับค่าจริงใน token ถ้าไม่เหมือน
+      ? "/admin_home"
+      : "/user_home"
+    : "/";
+
   return (
     <header className="header">
       <div className="nav-logo">
@@ -42,26 +48,22 @@ function Navbar() {
       </div>
 
       <nav className="nav-menu">
-        <Link to="/">Home</Link>
+        {/* ใช้ homePath แทน / */}
+        <Link to={homePath}>Home</Link>
         <Link to="/userhistory">History</Link>
         <Link to="/aboutus">About Us</Link>
       </nav>
 
       <div className="nav-auth">
         {isAuthPage ? (
-          // อยู่หน้า login หรือ register → โชว์ปุ่ม Register/ Login เหมือนเดิม
           <>
-            {/* Register = แดงตลอด */}
             <Link
               to="/register"
               className="nav-auth-link nav-auth-register"
             >
               Register
             </Link>
-
             <span className="nav-auth-sep">|</span>
-
-            {/* Login = ขาวตลอด */}
             <Link
               to="/login"
               className="nav-auth-link"
@@ -70,7 +72,6 @@ function Navbar() {
             </Link>
           </>
         ) : user ? (
-          // ล็อกอินแล้ว → แสดงชื่อ + logout
           <div className="nav-user-wrapper">
             <img src={userIcon} alt="User" className="nav-user-icon" />
             <Link to="/userinfo" className="nav-username nav-username-link">
@@ -82,19 +83,14 @@ function Navbar() {
             </span>
           </div>
         ) : (
-          // ยังไม่ล็อกอิน + ไม่ได้อยู่หน้า login/register
           <>
-            {/* Register = แดงตลอด */}
             <Link
               to="/register"
               className="nav-auth-link nav-auth-register"
             >
               Register
             </Link>
-
             <span className="nav-auth-sep">|</span>
-
-            {/* Login = ขาวตลอด */}
             <Link to="/login" className="nav-auth-link">
               Login
             </Link>

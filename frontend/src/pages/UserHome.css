@@ -48,10 +48,11 @@
 
 /* ข้อความอธิบายด้านล่าง */
 .userhome-content {
-  width: min(900px, 90%);
+  width: min(1500px, 90%);
   margin-top: 40px;
   color: #ffffff;
-  font-size: 14px;
+  font-size: 22px;
+  text-align: center;
   line-height: 1.7;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
 }

@@ -458,7 +458,7 @@ router.get('/package/ocrfail', (req, res) => {
            province, post_code, fragile, ocr_result,
            created_time, updated_time, package_img, modify_by
     FROM Package
-    WHERE status IN ('OCR_Fail', 'OCR_Update')
+    WHERE status IN ('OCR_Fail', 'OCR_Update', 'Return_Package')
     ORDER BY datetime(created_time) ${order}
     LIMIT ? OFFSET ?
   `;
@@ -471,7 +471,7 @@ router.get('/package/ocrfail', (req, res) => {
     const countSql = `
       SELECT COUNT(*) AS total
       FROM Package
-      WHERE status IN ('OCR_Fail', 'OCR_Update')
+      WHERE status IN ('OCR_Fail', 'OCR_Update', 'Return_Package')
     `;
 
     db.get(countSql, [], (err2, countRow) => {
@@ -602,6 +602,155 @@ router.get('/packages/:id', (req, res) => {
   });
 });
 
+
+
+
+/**
+ * @swagger
+ * /api/v1/packages/{id}:
+ *   put:
+ *     summary: Update package information (OCR Edit Page)
+ *     description: |
+ *       ใช้สำหรับแก้ไขข้อมูลพัสดุที่ OCR อ่านผิด  
+ *       - ปุ่ม **Save** จะส่งสถานะ `"OCR_Update"`  
+ *       - ปุ่ม **Return Package** จะส่งสถานะ `"Return_Package"`  
+ *       ระบบจะบันทึกข้อมูลผู้แก้ไขลง field `modify_by` อัตโนมัติ (ดึงจาก JWT)
+ *     tags:
+ *       - Package
+ *     security:
+ *       - bearerAuth: []   # ต้องส่ง Token มาด้วย
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Package ID ที่ต้องการแก้ไข
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               sender_name:
+ *                 type: string
+ *                 example: "สมชาย แก้ไขใหม่"
+ *               receiver_name:
+ *                 type: string
+ *                 example: "Kevin Levin"
+ *               sender_tel:
+ *                 type: string
+ *                 example: "0801112222"
+ *               receiver_tel:
+ *                 type: string
+ *                 example: "0813334444"
+ *               address:
+ *                 type: string
+ *                 example: "123 ถนนสุขุมวิท 50 กรุงเทพฯ 10240"
+ *               status:
+ *                 type: string
+ *                 enum: [OCR_Update, Return_Package]
+ *                 example: "OCR_Update"
+ *                 description: |
+ *                   - Save → OCR_Update  
+ *                   - Return Package → Return_Package
+ *             required:
+ *               - sender_name
+ *               - receiver_name
+ *               - sender_tel
+ *               - receiver_tel
+ *               - address
+ *               - status
+ *     responses:
+ *       200:
+ *         description: อัปเดตข้อมูลพัสดุสำเร็จ
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: "Package updated successfully"
+ *                 package_id:
+ *                   type: integer
+ *                   example: 3
+ *                 modify_by:
+ *                   type: integer
+ *                   example: 1
+ *                   description: user_id ของ admin ที่แก้ไขล่าสุด
+ *       404:
+ *         description: ไม่พบ package นี้
+ *       500:
+ *         description: Database error
+ */
+
+
+// ======================= API: UPDATE PACKAGE =========================
+
+router.put("/packages/:id", authRequired, (req, res) => {
+  const { id } = req.params;
+
+  const {
+    sender_name,
+    receiver_name,
+    sender_tel,
+    receiver_tel,
+    address,
+    status,
+  } = req.body;
+
+  const modify_by = req.user.user_id;   // <<< ดึงจาก JWT Token
+
+  const sql = `
+    UPDATE Package
+    SET
+      sender_name   = ?,
+      receiver_name = ?,
+      sender_tel    = ?,
+      receiver_tel  = ?,
+      address       = ?,
+      status        = ?,
+      modify_by     = ?,       
+      updated_time  = datetime('now', 'localtime')
+    WHERE package_id = ?;
+  `;
+
+  const params = [
+    sender_name,
+    receiver_name,
+    sender_tel,
+    receiver_tel,
+    address,
+    status,
+    modify_by,
+    id,
+  ];
+
+  db.run(sql, params, function (err) {
+    if (err) {
+      console.error("DB error:", err);
+      return res.status(500).json({ message: "Database error" });
+    }
+
+    if (this.changes === 0) {
+      return res.status(404).json({ message: "Package not found" });
+    }
+
+    res.json({
+      message: "Package updated successfully",
+      package_id: id,
+      modify_by: modify_by,
+    });
+  });
+});
+
+
+
+
+
+
 /**
  * @swagger
  * /api/v1/secure/packages/{id}:
@@ -669,7 +818,5 @@ router.get('/secure/packages/:id', authRequired, (req, res) => {
     });
   });
 });
-
-
 
 module.exports = router;

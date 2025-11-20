@@ -13,11 +13,13 @@ import PackageDetail from "./pages/PackageDetail";
 import UserInfo from "./pages/UserInfo";
 import ResetPassword from "./pages/ResetPassword";
 import AboutUs from "./pages/AboutUs";
+import AdminPackageEdit from "./pages/AdminPackageEdit";
 
 function App() {
   return (
     <Routes>
-      <Route path="/" element={<AdminHome />} />
+      <Route path="/" element={<UserHome />} />
+      <Route path="/admin_home" element={<AdminHome />} />
       <Route path="/userhistory" element={<UserHistory />} />
       <Route path="/register" element={<UserRegister />} />
       <Route path="/login" element={<UserLogin />} />
@@ -28,6 +30,7 @@ function App() {
       <Route path="/userinfo" element={<UserInfo />} />
       <Route path="/resetpassword" element={<ResetPassword />} />
       <Route path="/aboutus" element={<AboutUs />} />
+      <Route path="/admin/package/:id/edit" element={<AdminPackageEdit />} />
     </Routes>
   );
 }

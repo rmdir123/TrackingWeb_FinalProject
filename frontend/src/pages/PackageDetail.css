@@ -10,52 +10,46 @@
 /* ครอบทั้งกล่อง detail */
 .detail-wrapper {
   min-height: calc(100vh - 65px);
-  padding: 30px 0 40px;
+  padding: 40px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
-/* ปุ่มย้อนกลับ */
+/* ปุ่มย้อนกลับ ─ ทำแบบเดียวกับ admin-edit */
 .detail-back-btn {
-  position: absolute;
-  top: 12px;     /* อยู่ในแถบดำด้านบน */
-  left: 24px;
+  position: static;        /* ไม่ลอยทับแล้ว */
   background: transparent;
   border: none;
   color: #ffffff;
-  font-size: 28px;
+  font-size: 24px;
   cursor: pointer;
-  z-index: 10;
+  margin-bottom: 10px;
 }
 
+/* กล่องดำหลัก เหมือน admin-edit-card-shell */
 .detail-card-shell {
-  position: relative;
-  width: min(1150px, 96%);
-  background: rgba(0, 0, 0, 0.9);
-  border-radius: 18px;
-  padding: 18px;
-  box-sizing: border-box;
-}
-
-/* ให้กล่องเทาเลื่อนลงมาหน่อย จะได้เหลือแถบดำด้านบน */
-.detail-card {
-  background: #3a3a3a;
-  border-radius: 14px;
-  padding: 24px 26px 20px;
-  box-sizing: border-box;
+  width: 85%;
+  background: #111111;
+  border-radius: 20px;
+  padding: 30px;
   color: #ffffff;
-  margin-top: 24px;   /* 👈 เพิ่มบรรทัดนี้ */
+  box-sizing: border-box;
 }
 
-/* layout หลัก */
+/* ข้างในใช้ layout เหมือน admin package edit */
+.detail-card {
+  color: #ffffff;
+}
+
+/* layout หลัก (3 คอลัมน์) */
 .detail-top-row {
   display: grid;
   grid-template-columns: 2fr 3fr 1.7fr;
   gap: 24px;
 }
 
-/* รูป */
+/* ซ้าย: รูป */
 .detail-left {
   display: flex;
   flex-direction: column;
@@ -80,7 +74,7 @@
   margin-top: 4px;
 }
 
-/* ขวากลาง */
+/* กลาง: ข้อมูลสถานะ / ผู้ส่ง-ผู้รับ / OCR */
 .detail-right {
   display: flex;
   flex-direction: column;
@@ -98,17 +92,16 @@
   font-weight: 600;
 }
 
+.detail-status-value {
+  font-weight: 500;
+}
+
 .detail-status-dot {
   width: 10px;
   height: 10px;
   border-radius: 999px;
   background: #ffc93c;
   margin: 0 4px;
-}
-
-.detail-status-note {
-  color: #ffc93c;
-  font-weight: 500;
 }
 
 .detail-section {
@@ -125,7 +118,7 @@
   font-weight: 500;
 }
 
-/* OCR text */
+/* OCR text (ตัวอักษรเปล่า ๆ) */
 .detail-ocr-text {
   margin-top: 4px;
   white-space: pre-wrap;
@@ -133,7 +126,7 @@
   font-size: 13px;
 }
 
-/* คอลัมน์ขวาสุด - meta data */
+/* ขวาสุด: meta data */
 .detail-meta {
   display: flex;
   flex-direction: column;
@@ -145,25 +138,6 @@
   display: flex;
   justify-content: space-between;
   gap: 8px;
-}
-
-/* ด้านล่างขวา */
-.detail-bottom-row {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.detail-back-to-track {
-  background: none;
-  border: none;
-  color: #ffffff;
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.detail-back-to-track:hover {
-  text-decoration: underline;
 }
 
 /* loading / error */

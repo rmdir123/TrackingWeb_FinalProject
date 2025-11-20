@@ -134,10 +134,7 @@ function AdminHome() {
         {/* ⭐ แสดงผลลัพธ์แบบการ์ดเหมือนหน้า TrackPackage */}
         {searchResult && (
           <div className="trackpage-result-shell">
-            <button
-              className="trackpage-back-btn"
-              onClick={clearSearchResult}
-            >
+            <button className="trackpage-back-btn" onClick={clearSearchResult}>
               ←
             </button>
 
@@ -184,9 +181,7 @@ function AdminHome() {
                 <div className="trackpage-section">
                   <div className="trackpage-section-title">ผู้ส่ง :</div>
                   <div>{searchResult.sender_name}</div>
-                  <div>
-                    เบอร์โทรศัพท์ผู้ส่ง : {searchResult.sender_tel}
-                  </div>
+                  <div>เบอร์โทรศัพท์ผู้ส่ง : {searchResult.sender_tel}</div>
                 </div>
 
                 {/* ผู้รับ */}
@@ -195,9 +190,7 @@ function AdminHome() {
                   <div>{searchResult.receiver_name}</div>
                   <div>ที่อยู่ผู้รับ : {searchResult.address}</div>
                   <div>รหัสไปรษณีย์ : {searchResult.post_code}</div>
-                  <div>
-                    เบอร์โทรศัพท์ผู้รับ : {searchResult.receiver_tel}
-                  </div>
+                  <div>เบอร์โทรศัพท์ผู้รับ : {searchResult.receiver_tel}</div>
                 </div>
 
                 <div className="trackpage-detail-row">
@@ -276,16 +269,22 @@ function AdminHome() {
                           ? "status-badge status-fail"
                           : pkg.status === "OCR_Update"
                           ? "status-badge status-update"
+                          : pkg.status === "Return_Package"
+                          ? "status-badge status-return"
                           : "status-badge"
                       }
                     >
                       {pkg.status}
                     </td>
+
                     <td>
                       <button
                         type="button"
                         className="edit-btn"
                         title="แก้ไขข้อมูลพัสดุ"
+                        onClick={() =>
+                          navigate(`/admin/package/${pkg.package_id}/edit`)
+                        }
                       >
                         ✏️
                       </button>
