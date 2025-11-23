@@ -7,6 +7,7 @@ const nodemailer = require('nodemailer');
 
 const router = express.Router();
 const isDev = process.env.NODE_ENV !== 'production';
+const authRequired = require('../middlewares/authRequired');
 
 // ---------- ตั้งค่า Nodemailer (ส่งเมล OTP) ----------
 const transporter = nodemailer.createTransport({
@@ -394,8 +395,8 @@ router.post('/login', (req, res) => {
  *     description: |
  *       ผู้ใช้กรอกอีเมล ระบบจะสร้างรหัส OTP 6 หลัก อายุ 10 นาที แล้วส่งไปที่อีเมลนั้น  
  *       - ถ้า email ไม่อยู่ในระบบ จะตอบ message เหมือนกันเพื่อความปลอดภัย  
- *       - ในโหมด DEV จะส่ง `otp` กลับมาใน response เพื่อเอาไปลองกับ /verify-otp หรือ /reset-password ได้ง่าย ๆ  
- *       - ใน production ไม่ควรส่ง `otp` ออกมาทาง API
+ *       - ในโหมด DEV จะส่ง otp กลับมาใน response เพื่อเอาไปลองกับ /verify-otp หรือ /reset-password ได้ง่าย ๆ  
+ *       - ใน production ไม่ควรส่ง otp ออกมาทาง API
  *     requestBody:
  *       required: true
  *       content:
@@ -700,5 +701,53 @@ router.post('/reset-password', (req, res) => {
       return res.status(500).json({ error: hashErr.message });
     });
 });
+
+
+// ================== ดึงข้อมูล user จาก token ==================
+/**
+ * @swagger
+ * /api/v1/auth/me:
+ *   get:
+ *     tags: [Authen]
+ *     summary: ดึงข้อมูลผู้ใช้จาก JWT token
+ *     description: ใช้ header Authorization: Bearer <token> เพื่อดึงข้อมูลผู้ใช้ที่กำลังล็อกอินอยู่
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: ข้อมูลผู้ใช้ปัจจุบัน
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: ไม่ได้ส่ง token หรือ token ไม่ถูกต้อง
+ *       404:
+ *         description: ไม่พบผู้ใช้ในระบบ
+ */
+router.get('/me', authRequired, (req, res) => {
+  const sql = `
+    SELECT user_id, username, email, phone, role
+    FROM User
+    WHERE user_id = ?
+  `;
+  db.get(sql, [req.user.user_id], (err, row) => {
+    if (err) return res.status(500).json({ error: err.message });
+    if (!row) return res.status(404).json({ error: 'User not found' });
+
+    // ส่ง object user ตรง ๆ กลับไป
+    return res.json({
+      user_id: row.user_id,
+      username: row.username,
+      email: row.email,
+      phone: row.phone,
+      role: row.role,
+    });
+  });
+});
+
+
+
+
 
 module.exports = router;

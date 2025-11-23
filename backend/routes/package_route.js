@@ -395,7 +395,7 @@ router.get('/packages', (req, res) => {
  *   get:
  *     summary: ดึงรายการพัสดุที่เคยมีปัญหา OCR (OCR_Fail / OCR_Update)
  *     description: >
- *       คืนค่ารายการพัสดุที่สถานะปัจจุบันเป็น `OCR_Fail` หรือ `OCR_Update`  
+ *       คืนค่ารายการพัสดุที่สถานะปัจจุบันเป็น OCR_Fail หรือ OCR_Update  
  *       โดยใช้สำหรับดูพัสดุที่เคย OCR ไม่ผ่าน และพัสดุที่ถูกแก้ไข OCR แล้ว
  *     tags:
  *       - Package
@@ -419,7 +419,7 @@ router.get('/packages', (req, res) => {
  *           type: string
  *           enum: [asc, desc]
  *           default: desc
- *         description: รูปแบบการเรียงตามเวลา `created_time` (asc = เก่าก่อน, desc = ใหม่ก่อน)
+ *         description: รูปแบบการเรียงตามเวลา created_time (asc = เก่าก่อน, desc = ใหม่ก่อน)
  *     responses:
  *       200:
  *         description: รายการพัสดุที่เคยมีปัญหา OCR
@@ -612,9 +612,9 @@ router.get('/packages/:id', (req, res) => {
  *     summary: Update package information (OCR Edit Page)
  *     description: |
  *       ใช้สำหรับแก้ไขข้อมูลพัสดุที่ OCR อ่านผิด  
- *       - ปุ่ม **Save** จะส่งสถานะ `"OCR_Update"`  
- *       - ปุ่ม **Return Package** จะส่งสถานะ `"Return_Package"`  
- *       ระบบจะบันทึกข้อมูลผู้แก้ไขลง field `modify_by` อัตโนมัติ (ดึงจาก JWT)
+ *       - ปุ่ม **Save** จะส่งสถานะ OCR_Update  
+ *       - ปุ่ม **Return Package** จะส่งสถานะ Return_Package  
+ *       ระบบจะบันทึกข้อมูลผู้แก้ไขลง field modify_by อัตโนมัติ (ดึงจาก JWT)
  *     tags:
  *       - Package
  *     security:

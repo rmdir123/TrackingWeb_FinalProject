@@ -31,6 +31,32 @@ function AdminHome() {
   const [ocrFailPackages, setOcrFailPackages] = useState([]);
   const [ocrFailError, setOcrFailError] = useState("");
 
+  // 🔔 state สำหรับ Notification
+  const [notification, setNotification] = useState(null);
+  const [notificationError, setNotificationError] = useState("");
+
+  // ====== ฟังก์ชันดึงแจ้งเตือน OCR_Failure ตัวแรกที่ยังไม่ได้อ่าน ======
+  async function fetchFirstUnreadNotification() {
+    try {
+      setNotificationError("");
+      const res = await axios.get(
+        "http://localhost:5000/api/v1/notifications?status=UNREAD"
+      );
+
+      // รองรับทั้งแบบ { data: [] } หรือ { notifications: [] }
+      const list = res.data?.data || res.data?.notifications || [];
+
+      if (Array.isArray(list) && list.length > 0) {
+        setNotification(list[0]);
+      } else {
+        setNotification(null);
+      }
+    } catch (err) {
+      console.error(err);
+      setNotificationError("ไม่สามารถโหลดแจ้งเตือน OCR ได้");
+    }
+  }
+
   // ดึงรายการพัสดุทั้งหมด (โชว์ปกติ)
   useEffect(() => {
     axios
@@ -52,7 +78,12 @@ function AdminHome() {
       });
   }, []);
 
-  // ไม่ให้หน้า scroll
+  // ดึง Notification ครั้งแรก
+  useEffect(() => {
+    fetchFirstUnreadNotification();
+  }, []);
+
+  // ไม่ให้หน้า scroll (โค้ดเดิมของมึง)
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
@@ -106,6 +137,21 @@ function AdminHome() {
     setSearchError("");
   };
 
+  // 🔔 กดปุ่ม Close → mark READ แล้วโหลดตัวถัดไป
+  const handleCloseNotification = async () => {
+    if (!notification) return;
+
+    try {
+      await axios.patch(
+        `http://localhost:5000/api/v1/notifications/${notification.id}/read`
+      );
+      await fetchFirstUnreadNotification();
+    } catch (err) {
+      console.error(err);
+      setNotificationError("ไม่สามารถอัปเดตสถานะแจ้งเตือนได้");
+    }
+  };
+
   return (
     <div
       className="app"
@@ -117,6 +163,30 @@ function AdminHome() {
       <Navbar />
 
       <main className="content">
+        {/* 🔔 Toast แจ้งเตือน OCR Failure มุมขวาบน */}
+        {notification && (
+          <div className="ocr-toast-container">
+            <div className="ocr-popup">
+              <div className="ocr-popup-title">OCR Failure</div>
+              <div className="ocr-popup-text">
+                Package ID : {notification.package_id}
+              </div>
+              <button
+                type="button"
+                className="ocr-popup-close-btn"
+                onClick={handleCloseNotification}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+        {notificationError && (
+          <p className="error-text" style={{ marginTop: "8px" }}>
+            {notificationError}
+          </p>
+        )}
+
         {/* SEARCH BOX (เหมือนเดิม) */}
         <form className="search-box-wrapper" onSubmit={handleSearch}>
           <input
@@ -213,7 +283,14 @@ function AdminHome() {
         <div className="packet-list-container">
           <ul className="packet-list">
             {packages.map((pkg) => (
-              <li key={pkg.package_id} className="packet-item">
+              <li
+                key={pkg.package_id}
+                className="packet-item"
+                onClick={() =>
+                  navigate(`/package/${pkg.package_id}/detail`)
+                }
+                style={{ cursor: "pointer" }} // ให้เมาส์เป็นรูปมือเวลา hover
+              >
                 <div className="left-box">
                   {pkg.package_img && (
                     <img

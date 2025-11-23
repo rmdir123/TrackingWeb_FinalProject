@@ -1,0 +1,334 @@
+.manager-content {
+  padding-top: 20px;
+}
+
+/* ============ TOP LAYOUT ============ */
+.manager-top {
+  position: relative;
+  width: 100%;
+  margin-bottom: 30px;
+}
+
+/* LEFT CONTROLS ติดขอบซ้าย */
+.manager-controls {
+  position: absolute;
+  left: 40px;
+  top: 0;
+  width: 260px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.manager-box {
+  background: rgba(0, 0, 0, 0.55);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  color: white;
+}
+
+.manager-box h3 {
+  margin: 0 0 8px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* status */
+.status-on {
+  background: #1bcf4b;
+  padding: 2px 8px;
+  border-radius: 8px;
+  color: black;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* buttons */
+.btn-green,
+.btn-red,
+.btn-gray {
+  border: none;
+  border-radius: 100px;
+  padding: 5px 12px;
+  margin-right: 8px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.btn-green { background: #22c55e; color: black; }
+.btn-red { background: #ef4444; color: black; }
+.btn-gray { background: #9ca3af; color: black; }
+
+.btn-green:hover,
+.btn-red:hover,
+.btn-gray:hover {
+  filter: brightness(1.1);
+}
+
+/* LIVE CAMERA กลางจอจริง ๆ */
+.manager-livecam-wrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.manager-livecam {
+  background: rgba(0, 0, 0, 0.55);
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  text-align: center;
+  width: 900px;
+}
+
+.manager-livecam h3 {
+  color: white;
+  margin: 0 0 10px 0;
+  font-size: 18px;
+}
+
+.livecam-frame {
+  width: 100%;
+  height: 450px;
+  background: rgba(0, 0, 0, 0.65);
+  border-radius: 12px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.livecam-frame img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+/* ============ TABLE SECTION ============ */
+.manager-admin-section {
+  margin: 0 auto;                  /* ✅ ให้ตารางอยู่กลาง */
+  width: 90%;
+  max-width: 1100px;
+  background: rgba(0, 0, 0, 0.55);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(4px);
+  padding: 16px 20px 20px;
+}
+
+.manager-admin-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.manager-admin-title {
+  color: white;
+  margin: 0;
+  font-size: 18px;
+}
+
+.btn-add-admin {
+  background: #22c55e;
+  color: black;
+  border: none;
+  padding: 6px 16px;
+  border-radius: 100px;
+  cursor: pointer;
+  font-weight: 600;
+}
+.btn-add-admin:hover {
+  filter: brightness(1.1);
+}
+
+/* wrapper table */
+.manager-table-wrapper {
+  max-height: 240px;
+  overflow-y: auto;
+  margin-top: 8px;
+  border-radius: 8px;
+}
+
+/* table */
+.manager-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #ffd7dd;
+}
+
+.manager-admin-table thead th {
+  background: #ffc4ce;
+  padding: 8px;
+  text-align: left;
+}
+
+.manager-admin-table td {
+  padding: 8px;
+  border-bottom: 1px solid #0001;
+}
+
+.manager-action-cell {
+  display: flex;
+  gap: 8px;
+}
+
+/* icon buttons */
+.icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  cursor: pointer;
+}
+
+.icon-btn.edit { background: #facc15; }
+.icon-btn.delete { background: #ef4444; color: white; }
+
+.manager-empty {
+  text-align: center;
+  padding: 12px 0;
+}
+
+/* info text */
+.info-text {
+  font-size: 13px;
+  color: #e5e7eb;
+}
+
+.error-text {
+  font-size: 13px;
+  color: #f97373;
+}
+
+/* ============ POPUP FORM ============ */
+.manager-form-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.manager-form-card {
+  width: 520px;
+  max-width: 90vw;
+  background: #333333;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(6px);
+  padding: 20px 24px 24px;
+  color: #f9fafb;
+}
+
+.manager-form-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.manager-form-header h3 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.manager-form-close {
+  border: none;
+  background: transparent;
+  color: #f9fafb;
+  font-size: 22px;
+  cursor: pointer;
+}
+
+.manager-form-body .form-row {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+
+.manager-form-body label {
+  font-size: 15px;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.manager-form-body input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #4b5563;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f9fafb;
+  font-size: 16px;
+}
+
+.hint-text {
+  font-size: 12px;
+  color: #9ca3af;
+}
+
+.manager-form-footer {
+  margin-top: 18px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.btn-cancel,
+.btn-save {
+  padding: 8px 18px;
+  border-radius: 999px;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-cancel {
+  background: #4b5563;
+  color: #f9fafb;
+}
+
+.btn-save {
+  background: #22c55e;
+  color: #000;
+  font-weight: 700;
+}
+
+.btn-cancel:disabled,
+.btn-save:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+/* กล่องปุ่มลัดฝั่งซ้าย */
+.manager-nav-box {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn-nav {
+  background: #D9D9D9;
+  color: #333333;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 14px;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.btn-nav + .btn-nav {
+  margin-top: 6px;
+}
+
+.btn-nav:hover {
+  filter: brightness(1.15);
+}

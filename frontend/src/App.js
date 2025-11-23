@@ -14,6 +14,7 @@ import UserInfo from "./pages/UserInfo";
 import ResetPassword from "./pages/ResetPassword";
 import AboutUs from "./pages/AboutUs";
 import AdminPackageEdit from "./pages/AdminPackageEdit";
+import ManagerHome from "./pages/ManagerHome";
 
 function App() {
   return (
@@ -31,6 +32,7 @@ function App() {
       <Route path="/resetpassword" element={<ResetPassword />} />
       <Route path="/aboutus" element={<AboutUs />} />
       <Route path="/admin/package/:id/edit" element={<AdminPackageEdit />} />
+      <Route path="/manager_home" element={<ManagerHome />} />
     </Routes>
   );
 }

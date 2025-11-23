@@ -54,10 +54,16 @@ function UserLogin() {
 
       // จะ redirect ไปไหนก็แล้วแต่มึง
       // เช่น ถ้า role เป็น admin → ไปหน้า AdminHome
+            // จะ redirect ไปไหนก็แล้วแต่มึง
+      // เช่น ถ้า role เป็น admin → ไปหน้า AdminHome
       if (user?.role === "admin") {
         navigate("/admin_home");
+      } else if (user?.role === "system_manager") {
+        // ถ้าเป็น role system_manager ให้ไปหน้า manager_home
+        navigate("/manager_home");
       } else {
-        navigate("/user_home"); // หรือหน้า user home
+        // ที่เหลือ (user ปกติ ฯลฯ) ไปหน้า user_home
+        navigate("/user_home");
       }
     } catch (err) {
       console.error(err);

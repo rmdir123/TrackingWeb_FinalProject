@@ -312,3 +312,67 @@
 .edit-btn:hover {
   background: #eee;
 }
+
+
+/* 🔔 Toast OCR Failure มุมขวาบน — Stack แบบ Telegram/Discord */
+.ocr-toast-container {
+  position: fixed;
+  top: 80px;          /* ⭐ เพิ่มจากเดิม 20 → ไม่ให้โดน Navbar */
+  right: 20px;
+  z-index: 999999;    /* ⭐ สูงกว่า navbar แน่นอน */
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;          /* ระยะห่างระหว่าง toast */
+  pointer-events: none; /* พื้นที่ว่างไม่ขวางการคลิก */
+}
+
+/* Toast แต่ละอัน */
+.ocr-popup {
+  background: #333333;
+  color: #ffffff;
+  padding: 18px 26px;
+  border-radius: 16px;
+  min-width: 260px;
+  text-align: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+  pointer-events: auto; /* คลิก toast ได้ */
+
+  /* ⭐ Animations (ลอยขึ้นแบบสวย ๆ) */
+  opacity: 0;
+  transform: translateY(10px);
+  animation: toastFadeIn 0.3s forwards;
+}
+
+@keyframes toastFadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.ocr-popup-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.ocr-popup-text {
+  font-size: 14px;
+  opacity: 0.9;
+  margin-bottom: 14px;
+}
+
+.ocr-popup-close-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 24px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #e0e0e0;
+  color: #333333;
+}
+
+.ocr-popup-close-btn:hover {
+  background: #f5f5f5;
+}

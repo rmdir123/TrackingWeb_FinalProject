@@ -6,21 +6,53 @@ import userIcon from "../images/usericon.png";
 
 function Navbar() {
   const [user, setUser] = useState(null);
+  const [checking, setChecking] = useState(true); // ตรวจสอบ token อยู่
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    const stored = localStorage.getItem("user");
-    if (stored) {
-      try {
-        setUser(JSON.parse(stored));
-      } catch (e) {
-        console.error("parse user error", e);
+  // ⭐ ตรวจสอบ token แบบ "ทางการ" ด้วยการยิงไปถาม backend
+  const verifyToken = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      setUser(null);
+      setChecking(false);
+      return;
+    }
+
+    try {
+      const res = await fetch("http://localhost:5000/api/v1/auth/me", {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (!res.ok) {
+        // ❌ token หมดอายุ / ใช้ไม่ได้
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
         setUser(null);
+      } else {
+        // ✔ token ใช้ได้
+        const data = await res.json();
+
+        // รองรับทั้งกรณี backend ส่ง { user: {...} } กับ {...} ตรง ๆ
+        const cleanedUser = data.user ? data.user : data;
+
+        setUser(cleanedUser);
+        localStorage.setItem("user", JSON.stringify(cleanedUser));
       }
-    } else {
+    } catch (err) {
+      console.error("verify token error:", err);
       setUser(null);
     }
+
+    setChecking(false);
+  };
+
+  // ⭐ รัน verifyToken ทุกครั้งที่เปลี่ยนหน้า
+  useEffect(() => {
+    verifyToken();
   }, [location.pathname]);
 
   const handleLogout = () => {
@@ -30,16 +62,17 @@ function Navbar() {
     navigate("/login");
   };
 
-  const isLoginPage = location.pathname === "/login";
   const isAuthPage =
-    isLoginPage || location.pathname === "/register";
+    location.pathname === "/login" || location.pathname === "/register";
 
-  // 👇 ตรงนี้คือ logic เลือกหน้า Home ตาม role
   const homePath = user
-    ? user.role === "admin"   // ปรับ 'admin' ให้ตรงกับค่าจริงใน token ถ้าไม่เหมือน
-      ? "/admin_home"
-      : "/user_home"
-    : "/";
+  ? user.role === "admin"
+    ? "/admin_home"
+    : user.role === "system_manager"
+    ? "/manager_home"
+    : "/user_home"
+  : "/";
+
 
   return (
     <header className="header">
@@ -48,26 +81,20 @@ function Navbar() {
       </div>
 
       <nav className="nav-menu">
-        {/* ใช้ homePath แทน / */}
         <Link to={homePath}>Home</Link>
         <Link to="/userhistory">History</Link>
         <Link to="/aboutus">About Us</Link>
       </nav>
 
       <div className="nav-auth">
-        {isAuthPage ? (
+        {/* ระหว่างตรวจสอบ token ยังไม่แสดงอะไร */}
+        {checking ? null : isAuthPage ? (
           <>
-            <Link
-              to="/register"
-              className="nav-auth-link nav-auth-register"
-            >
+            <Link to="/register" className="nav-auth-link nav-auth-register">
               Register
             </Link>
             <span className="nav-auth-sep">|</span>
-            <Link
-              to="/login"
-              className="nav-auth-link"
-            >
+            <Link to="/login" className="nav-auth-link">
               Login
             </Link>
           </>
@@ -84,10 +111,7 @@ function Navbar() {
           </div>
         ) : (
           <>
-            <Link
-              to="/register"
-              className="nav-auth-link nav-auth-register"
-            >
+            <Link to="/register" className="nav-auth-link nav-auth-register">
               Register
             </Link>
             <span className="nav-auth-sep">|</span>
