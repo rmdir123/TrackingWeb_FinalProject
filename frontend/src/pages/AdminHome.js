@@ -40,7 +40,7 @@ function AdminHome() {
     try {
       setNotificationError("");
       const res = await axios.get(
-        "http://localhost:5000/api/v1/notifications?status=UNREAD"
+        "http://43.209.65.64:5000/api/v1/notifications?status=UNREAD"
       );
 
       // รองรับทั้งแบบ { data: [] } หรือ { notifications: [] }
@@ -60,7 +60,7 @@ function AdminHome() {
   // ดึงรายการพัสดุทั้งหมด (โชว์ปกติ)
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/v1/packages")
+      .get("http://43.209.65.64:5000/api/v1/packages")
       .then((res) => setPackages(res.data?.data || []))
       .catch((err) => console.error(err));
   }, []);
@@ -68,7 +68,7 @@ function AdminHome() {
   // ดึงรายการพัสดุ OCR_Fail
   useEffect(() => {
     axios
-      .get("http://localhost:5000/api/v1/package/ocrfail")
+      .get("http://43.209.65.64:5000/api/v1/package/ocrfail")
       .then((res) => {
         setOcrFailPackages(res.data?.data || []);
       })
@@ -107,8 +107,8 @@ function AdminHome() {
       // ถ้ามี token → ใช้ /secure/... + ส่ง Authorization
       // ถ้าไม่มี token → ใช้ /packages/... ปกติ
       const url = token
-        ? `http://localhost:5000/api/v1/secure/packages/${id}`
-        : `http://localhost:5000/api/v1/packages/${id}`;
+        ? `http://43.209.65.64:5000/api/v1/secure/packages/${id}`
+        : `http://43.209.65.64:5000/api/v1/packages/${id}`;
 
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -143,7 +143,7 @@ function AdminHome() {
 
     try {
       await axios.patch(
-        `http://localhost:5000/api/v1/notifications/${notification.id}/read`
+        `http://43.209.65.64:5000/api/v1/notifications/${notification.id}/read`
       );
       await fetchFirstUnreadNotification();
     } catch (err) {

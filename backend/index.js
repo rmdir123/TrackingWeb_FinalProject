@@ -1,7 +1,6 @@
 // index.js
 
 require('dotenv').config();
-
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -19,7 +18,15 @@ const { swaggerUi, swaggerSpec } = require('./docs/swagger')
 const app = express();
 app.use(cors());
 app.use(express.json());
-app.use(helmet());
+// app.use(helmet());
+
+app.use(
+  helmet({
+    contentSecurityPolicy: false, // ปิด CSP ชั่วคราว (ตัวกันโหลด Script)
+    crossOriginEmbedderPolicy: false, 
+    hsts: false, // <--- สำคัญมาก! ปิดการบังคับ HTTPS
+  })
+);
 
 app.get('/', (req, res) => res.send('API v1 is running.'));
 
@@ -34,4 +41,9 @@ app.use('/api/v1/admin', adminUserRoute); // admin user management
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger
 
 const PORT = 5000;
+const path = require('path');
+app.use(express.static(path.join(__dirname, 'public')));
+app.get(/(.*)/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 app.listen(PORT, () => console.log(`Server running at http://localhost:${PORT}`));

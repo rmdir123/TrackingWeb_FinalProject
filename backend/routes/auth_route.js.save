@@ -63,7 +63,7 @@ db.run(initOtpTableSql, (err) => {
  * @swagger
  * tags:
  *   - name: Authen
- *     description: สมัครสมาชิก/เข้าสู่ระบบ และกู้คืนรหัสผ่านด้วย OTP
+ *     description: "สมัครสมาชิก/เข้าสู่ระบบ และกู้คืนรหัสผ่านด้วย OTP"
  *
  * components:
  *   securitySchemes:
@@ -235,8 +235,8 @@ db.run(initOtpTableSql, (err) => {
  * /api/v1/auth/register:
  *   post:
  *     tags: [Authen]
- *     summary: สมัครสมาชิก
- *     description: บังคับเพิ่มชื่อผู้ใช้ รหัสผ่าน email เบอร์โทรศัพท์ ให้ครบถึงจะสมัครใช้งานได้
+ *     summary: "สมัครสมาชิก"
+ *     description: "บังคับเพิ่มชื่อผู้ใช้ รหัสผ่าน email เบอร์โทรศัพท์ ให้ครบถึงจะสมัครใช้งานได้"
  *     requestBody:
  *       required: true
  *       content:
@@ -252,25 +252,25 @@ db.run(initOtpTableSql, (err) => {
  *                 phone: "0812345678"
  *     responses:
  *       201:
- *         description: สมัครสมาชิกสำเร็จ
+ *         description: "สมัครสมาชิกสำเร็จ"
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/RegisterResponse'
  *       400:
- *         description: ข้อมูลไม่ครบหรือไม่ถูกต้อง
+ *         description: "ข้อมูลไม่ครบหรือไม่ถูกต้อง"
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       409:
- *         description: username หรือ email ถูกใช้แล้ว
+ *         description: "username หรือ email ถูกใช้แล้ว"
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
- *         description: ข้อผิดพลาดภายในเซิร์ฟเวอร์
+ *         description: "ข้อผิดพลาดภายในเซิร์ฟเวอร์"
  *         content:
  *           application/json:
  *             schema:
@@ -315,8 +315,8 @@ router.post('/register', async (req, res) => {
  * /api/v1/auth/login:
  *   post:
  *     tags: [Authen]
- *     summary: เข้าสู่ระบบ
- *     description: ใส่ username และ password ให้ตรงกับข้อมูลในฐานข้อมูล จะได้รับ jwt token สำหรับยืนยันตัวตนในหน้าอื่นๆ Username win1234 (system_manager)
+ *     summary: "เข้าสู่ระบบ"
+ *     description: "ใส่ username และ password ให้ตรงกับข้อมูลในฐานข้อมูล จะได้รับ jwt token สำหรับยืนยันตัวตนในหน้าอื่นๆ Username win1234 (system_manager)"
  *     requestBody:
  *       required: true
  *       content:
@@ -330,25 +330,25 @@ router.post('/register', async (req, res) => {
  *                 password: "password"
  *     responses:
  *       200:
- *         description: เข้าสู่ระบบสำเร็จ พร้อม JWT token
+ *         description: "เข้าสู่ระบบสำเร็จ พร้อม JWT token"
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/LoginResponse'
  *       400:
- *         description: กรอกข้อมูลไม่ครบ
+ *         description: "กรอกข้อมูลไม่ครบ"
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       401:
- *         description: ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง
+ *         description: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง"
  *         content:
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  *       500:
- *         description: ข้อผิดพลาดภายในเซิร์ฟเวอร์
+ *         description: "ข้อผิดพลาดภายในเซิร์ฟเวอร์"
  *         content:
  *           application/json:
  *             schema:
@@ -391,12 +391,12 @@ router.post('/login', (req, res) => {
  * /api/v1/auth/forgot-password:
  *   post:
  *     tags: [Authen]
- *     summary: ขอ OTP สำหรับรีเซ็ตรหัสผ่าน (ส่งทางอีเมล)
- *     description: |
+ *     summary: "ขอ OTP สำหรับรีเซ็ตรหัสผ่าน (ส่งทางอีเมล)"
+ *     description: "|
  *       ผู้ใช้กรอกอีเมล ระบบจะสร้างรหัส OTP 6 หลัก อายุ 10 นาที แล้วส่งไปที่อีเมลนั้น  
  *       - ถ้า email ไม่อยู่ในระบบ จะตอบ message เหมือนกันเพื่อความปลอดภัย  
  *       - ในโหมด DEV จะส่ง otp กลับมาใน response เพื่อเอาไปลองกับ /verify-otp หรือ /reset-password ได้ง่าย ๆ  
- *       - ใน production ไม่ควรส่ง otp ออกมาทาง API
+ *       - ใน production ไม่ควรส่ง otp ออกมาทาง API"
  *     requestBody:
  *       required: true
  *       content:
@@ -409,7 +409,7 @@ router.post('/login', (req, res) => {
  *                 email: "user01@mail.com"
  *     responses:
  *       200:
- *         description: ถ้า email อยู่ในระบบ ระบบได้ส่ง OTP ไปที่อีเมลแล้ว
+ *         description: "ถ้า email อยู่ในระบบ ระบบได้ส่ง OTP ไปที่อีเมลแล้ว"
  *         content:
  *           application/json:
  *             schema:
@@ -703,26 +703,27 @@ router.post('/reset-password', (req, res) => {
 });
 
 
+// ================== ดึงข้อมูล user จาก token ==================
 /**
  * @swagger
  * /api/v1/auth/me:
- * get:
- * tags: [Authen]
- * summary: ดึงข้อมูลผู้ใช้จาก JWT token
- * description: "ใช้ header Authorization: Bearer <token> เพื่อดึงข้อมูลผู้ใช้ที่กำลังล็อกอินอยู่"
- * security:
- * - bearerAuth: []
- * responses:
- * 200:
- * description: ข้อมูลผู้ใช้ปัจจุบัน
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/User'
- * 401:
- * description: ไม่ได้ส่ง token หรือ token ไม่ถูกต้อง
- * 404:
- * description: ไม่พบผู้ใช้ในระบบ
+ *   get:
+ *     tags: [Authen]
+ *     summary: ดึงข้อมูลผู้ใช้จาก JWT token
+ *     description: ใช้ header Authorization: Bearer <token> เพื่อดึงข้อมูลผู้ใช้ที่กำลังล็อกอินอยู่
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: ข้อมูลผู้ใช้ปัจจุบัน
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: ไม่ได้ส่ง token หรือ token ไม่ถูกต้อง
+ *       404:
+ *         description: ไม่พบผู้ใช้ในระบบ
  */
 router.get('/me', authRequired, (req, res) => {
   const sql = `
@@ -750,4 +751,3 @@ router.get('/me', authRequired, (req, res) => {
 
 
 module.exports = router;
-

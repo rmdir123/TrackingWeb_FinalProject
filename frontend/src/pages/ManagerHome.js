@@ -30,7 +30,7 @@ function ManagerHome() {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get("http://localhost:5000/api/v1/admin/admins");
+      const res = await axios.get("http://43.209.65.64:5000/api/v1/admin/admins");
       setAdmins(res.data || []);
     } catch (err) {
       console.error(err);
@@ -112,7 +112,7 @@ function ManagerHome() {
         }
 
         await axios.post(
-          "http://localhost:5000/api/v1/admin/users",
+          "http://43.209.65.64:5000/api/v1/admin/users",
           {
             username: formData.username,
             email: formData.email,
@@ -130,7 +130,7 @@ function ManagerHome() {
         }
 
         await axios.put(
-          `http://localhost:5000/api/v1/admin/users/${formData.user_id}`,
+          `http://43.209.65.64:5000/api/v1/admin/users/${formData.user_id}`,
           {
             username: formData.username,
             email: formData.email,
@@ -166,7 +166,7 @@ function ManagerHome() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       await axios.delete(
-        `http://localhost:5000/api/v1/admin/users/${admin.user_id}`,
+        `http://43.209.65.64:5000/api/v1/admin/users/${admin.user_id}`,
         { headers }
       );
       await fetchAdmins();

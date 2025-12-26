@@ -43,7 +43,7 @@ function UserRegister() {
 
     // ยิงไป backend (ตัวเดียวกับที่ swagger ใช้)
     const res = await axios.post(
-      "http://localhost:5000/api/v1/auth/register",   // <-- แก้ให้ตรงของมึง
+      "http://43.209.65.64:5000/api/v1/auth/register",   // <-- แก้ให้ตรงของมึง
       payload
     );
 

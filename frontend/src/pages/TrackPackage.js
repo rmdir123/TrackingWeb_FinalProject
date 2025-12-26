@@ -36,7 +36,7 @@ function TrackPackage() {
 
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/v1/packages/${searchId}`
+        `http://43.209.65.64:5000/api/v1/packages/${searchId}`
       );
       const data = res.data.data || res.data;
       setPkg(data);

@@ -7,7 +7,7 @@ import Navbar from "../components/Navbar";
 import bg from "../images/bg.png";
 import "./PackageDetail.css";
 
-const PACKAGE_URL = "http://localhost:5000/api/v1/packages";
+const PACKAGE_URL = "http://43.209.65.64:5000/api/v1/packages";
 
 function formatDateTime(str) {
   if (!str) return "-";
