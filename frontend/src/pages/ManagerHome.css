@@ -1,3 +1,21 @@
+/* ================= GLOBAL FIX ================= */
+/* FIX: ลบขอบขาวด้านล่าง */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+  min-height: 100vh;
+}
+
+/* ================= EXISTING CODE ================= */
+
 .manager-content {
   padding-top: 20px;
 }
@@ -108,7 +126,7 @@
 
 /* ============ TABLE SECTION ============ */
 .manager-admin-section {
-  margin: 0 auto;                  /* ✅ ให้ตารางอยู่กลาง */
+  margin: 0 auto;
   width: 90%;
   max-width: 1100px;
   background: rgba(0, 0, 0, 0.55);
@@ -140,6 +158,7 @@
   cursor: pointer;
   font-weight: 600;
 }
+
 .btn-add-admin:hover {
   filter: brightness(1.1);
 }
@@ -204,26 +223,40 @@
 }
 
 /* ============ POPUP FORM ============ */
+/* FIX: popup อยู่กลางจอจริง + ไม่ลอยต่ำ */
+/* ============ POPUP FORM (FIXED จริง) ============ */
 .manager-form-overlay {
-  position: fixed;
-  inset: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 100%;
+  height: 100%;
+
   background: rgba(0, 0, 0, 0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 999;
+  z-index: 9999;
 }
 
+
 .manager-form-card {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
   width: 520px;
   max-width: 90vw;
+  max-height: 90vh;
+
+  overflow-y: auto;
+
   background: #333333;
   border-radius: 14px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(6px);
   padding: 20px 24px 24px;
   color: #f9fafb;
 }
+
 
 .manager-form-header {
   display: flex;
@@ -300,12 +333,6 @@
   font-weight: 700;
 }
 
-.btn-cancel:disabled,
-.btn-save:disabled {
-  opacity: 0.7;
-  cursor: default;
-}
-
 /* กล่องปุ่มลัดฝั่งซ้าย */
 .manager-nav-box {
   display: flex;
@@ -323,10 +350,6 @@
   cursor: pointer;
   width: 100%;
   text-align: left;
-}
-
-.btn-nav + .btn-nav {
-  margin-top: 6px;
 }
 
 .btn-nav:hover {
