@@ -119,7 +119,7 @@ function AdminPackageEdit() {
     return (
       <div
         className="detail-app"
-        style={{ "--bg-image": `url(${bg})` }}
+        style={{ "--bg-image": "url('/images/bg.png')" }}
       >
         <Navbar />
         <div className="admin-edit-wrapper">
@@ -133,7 +133,7 @@ function AdminPackageEdit() {
     return (
       <div
         className="detail-app"
-        style={{ "--bg-image": `url(${bg})` }}
+        style={{ "--bg-image": "url('/images/bg.png')" }}
       >
         <Navbar />
         <div className="admin-edit-wrapper">
@@ -182,7 +182,7 @@ function AdminPackageEdit() {
   return (
     <div
       className="detail-app"
-      style={{ "--bg-image": `url(${bg})` }}
+      style={{ "--bg-image": "url('/images/bg.png')" }}
     >
       <Navbar />
 
