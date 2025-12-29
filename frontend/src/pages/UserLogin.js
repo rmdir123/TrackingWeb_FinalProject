@@ -81,7 +81,7 @@ function UserLogin() {
     <div
       className="login-app"
       style={{
-        "--bg-image": `url(${bg})`,
+        "--bg-image": "url('/images/bg.png')",
       }}
     >
       {/* NAVBAR */}

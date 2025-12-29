@@ -118,7 +118,7 @@ function UserHistory() {
     <div
       className="app"
       style={{
-        "--bg-image": `url(${bg})`, // ⭐ ตรงนี้แหละตัวสำคัญ
+        "--bg-image": "url('/images/bg.png')", // ⭐ ตรงนี้แหละตัวสำคัญ
       }}
     >
       <Navbar />

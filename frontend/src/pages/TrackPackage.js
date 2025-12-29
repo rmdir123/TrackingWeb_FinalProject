@@ -62,7 +62,7 @@ function TrackPackage() {
     <div
       className="track-app"
       style={{
-        "--bg-image": `url(${bg})`,
+        "--bg-image": "url('/images/bg.png')",
       }}
     >
       {/* NAVBAR */}

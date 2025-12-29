@@ -63,7 +63,7 @@ function UserRegister() {
     <div
       className="register-app"
       style={{
-        "--bg-image": `url(${bg})`,
+        "--bg-image": "url('/images/bg.png')",
       }}
     >
       {/* NAVBAR */}

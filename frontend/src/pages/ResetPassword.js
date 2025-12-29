@@ -146,7 +146,7 @@ function ResetPassword() {
     <div
       className="app"
       style={{
-        "--bg-image": `url(${bg})`,
+        "--bg-image": "url('/images/bg.png')",
       }}
     >
       <Navbar />
