@@ -36,20 +36,20 @@ function TrackPackage() {
 
     try {
       // 1. เช็คว่ามีการ Login ไหม (ดึง token)
-      const token = localStorage.getItem("token");
-
+      const token = localStorage.getItem('token');
+      
       // 2. เลือก URL และ Config ตามสถานะการ Login
-      const url = token
-        ? `http://43.209.65.64:5000/api/v1/secure/packages/${searchId}` // มี Token ใช้ Secure
-        : `http://43.209.65.64:5000/api/v1/packages/${searchId}`; // ไม่มีใช้ Public
-
-      const config = token
-        ? { headers: { Authorization: `Bearer ${token}` } }
+      const url = token 
+        ? `http://43.209.65.64:5000/api/v1/secure/packages/${searchId}`  // มี Token ใช้ Secure
+        : `http://43.209.65.64:5000/api/v1/packages/${searchId}`;         // ไม่มีใช้ Public
+      
+      const config = token 
+        ? { headers: { Authorization: `Bearer ${token}` } } 
         : {};
 
       // 3. ยิง Axios ด้วย URL และ Config ที่เลือก
       const res = await axios.get(url, config);
-
+      
       const data = res.data.data || res.data;
       setPkg(data);
     } catch (err) {
@@ -62,6 +62,11 @@ function TrackPackage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleSearchSubmit = (e) => {
+    e.preventDefault();
+    handleSearch();
   };
 
   const handleBack = () => {
