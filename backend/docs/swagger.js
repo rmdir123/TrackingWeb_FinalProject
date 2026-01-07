@@ -8,7 +8,7 @@ const options = {
     info: {
       title: 'Tracking Package Website API',
       version: '1.0.0',
-      description: 'Swagger docs (auto from route comments)',
+      description: 'Swagger docs ',
     },
     servers: [
       {

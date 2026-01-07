@@ -3,31 +3,6 @@ const express = require("express");
 const router = express.Router();
 const db = require("../db");
 
-/* ==============================
-   Create Notification Table
-   ============================== */
-const createTableSql = `
-  CREATE TABLE IF NOT EXISTS Notification (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    package_id INTEGER NOT NULL,
-    message TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'UNREAD', -- UNREAD / READ
-    created_at TEXT DEFAULT (datetime('now', 'localtime')),
-    FOREIGN KEY (package_id) REFERENCES Package(package_id)
-  );
-`;
-
-db.run(createTableSql, (err) => {
-  if (err) {
-    console.error("❌ Error creating Notification table:", err.message);
-  } else {
-    console.log("✅ Notification table ready.");
-  }
-});
-
-/* ==============================
-   Swagger Tags
-   ============================== */
 
 /**
  * @swagger
@@ -57,10 +32,6 @@ db.run(createTableSql, (err) => {
  *           example: "2025-11-23 13:22:55"
  */
 
-/* ==============================
-   API: Create Notification (OCR_Failure)
-   ============================== */
-
 /**
  * @swagger
  * /api/v1/notifications/ocr-failure:
@@ -89,50 +60,6 @@ db.run(createTableSql, (err) => {
  *       404:
  *         description: ไม่พบพัสดุ
  */
-router.post("/ocr-failure", (req, res) => {
-  const { package_id, message } = req.body;
-
-  if (!package_id) {
-    return res.status(400).json({ error: "ต้องระบุ package_id" });
-  }
-
-  const sqlCheck = `SELECT status FROM Package WHERE package_id = ?`;
-  db.get(sqlCheck, [package_id], (err, pkg) => {
-    if (err) return res.status(500).json({ error: err.message });
-
-    if (!pkg) {
-      return res.status(404).json({ error: "ไม่พบพัสดุ" });
-    }
-
-    if (pkg.status !== "OCR_Fail" && pkg.status !== "OCR_Failure") {
-      return res.status(400).json({
-        error: `status ปัจจุบันคือ '${pkg.status}' ไม่ใช่ OCR_Fail`,
-      });
-    }
-
-    const msg =
-      message ||
-      `พบปัญหาการอ่านข้อมูลพัสดุ (package_id=${package_id})`;
-
-    const insertSql = `
-      INSERT INTO Notification (package_id, message, status)
-      VALUES (?, ?, 'UNREAD')
-    `;
-
-    db.run(insertSql, [package_id, msg], function (err2) {
-      if (err2) return res.status(500).json({ error: err2.message });
-
-      res.status(201).json({
-        message: "สร้างการแจ้งเตือนสำเร็จ",
-        notification_id: this.lastID,
-      });
-    });
-  });
-});
-
-/* ==============================
-   API: Get Notification List
-   ============================== */
 
 /**
  * @swagger
@@ -151,38 +78,6 @@ router.post("/ocr-failure", (req, res) => {
  *       200:
  *         description: รายการแจ้งเตือนทั้งหมด
  */
-router.get("/", (req, res) => {
-  const { status } = req.query;
-
-  let sql = `
-    SELECT n.id, n.package_id, n.message, n.status, n.created_at,
-           p.status AS package_status, p.sender_name, p.receiver_name
-    FROM Notification n
-    LEFT JOIN Package p ON p.package_id = n.package_id
-  `;
-
-  const params = [];
-
-  if (status) {
-    sql += ` WHERE n.status = ?`;
-    params.push(status);
-  }
-
-  sql += ` ORDER BY datetime(n.created_at) DESC`;
-
-  db.all(sql, params, (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-
-    res.json({
-      total: rows.length,
-      data: rows,
-    });
-  });
-});
-
-/* ==============================
-   API: Mark Notification as READ
-   ============================== */
 
 /**
  * @swagger
@@ -202,19 +97,114 @@ router.get("/", (req, res) => {
  *       404:
  *         description: ไม่พบแจ้งเตือน
  */
-router.patch("/:id/read", (req, res) => {
-  const { id } = req.params;
 
+
+/* ==============================
+   Create Notification Table (MySQL)
+   ============================== */
+const createTableSql = `
+  CREATE TABLE IF NOT EXISTS Notification (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    package_id INT NOT NULL,
+    message TEXT NOT NULL,
+    status VARCHAR(50) NOT NULL DEFAULT 'UNREAD',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (package_id) REFERENCES Package(package_id)
+  );
+`;
+
+db.query(createTableSql)
+  .then(() => console.log("✅ Notification table ready."))
+  .catch((err) => console.error("❌ Error creating Notification table:", err.message));
+
+// ======================= API START =========================
+
+// สร้างการแจ้งเตือนเมื่อพบว่า status = OCR_Fail
+router.post("/ocr-failure", async (req, res) => {
+  const { package_id, message } = req.body;
+
+  if (!package_id) {
+    return res.status(400).json({ error: "ต้องระบุ package_id" });
+  }
+
+  try {
+    const sqlCheck = `SELECT status FROM Package WHERE package_id = ?`;
+    const [packages] = await db.query(sqlCheck, [package_id]);
+    
+    if (packages.length === 0) {
+      return res.status(404).json({ error: "ไม่พบพัสดุ" });
+    }
+    const pkg = packages[0];
+
+    if (pkg.status !== "OCR_Fail" && pkg.status !== "OCR_Failure") {
+      return res.status(400).json({
+        error: `status ปัจจุบันคือ '${pkg.status}' ไม่ใช่ OCR_Fail`,
+      });
+    }
+
+    const msg = message || `พบปัญหาการอ่านข้อมูลพัสดุ (package_id=${package_id})`;
+
+    const insertSql = `
+      INSERT INTO Notification (package_id, message, status)
+      VALUES (?, ?, 'UNREAD')
+    `;
+    const [result] = await db.query(insertSql, [package_id, msg]);
+
+    res.status(201).json({
+      message: "สร้างการแจ้งเตือนสำเร็จ",
+      notification_id: result.insertId,
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ดึงรายการแจ้งเตือน
+router.get("/", async (req, res) => {
+  const { status } = req.query;
+
+  let sql = `
+    SELECT n.id, n.package_id, n.message, n.status, n.created_at,
+           p.status AS package_status, p.sender_name, p.receiver_name
+    FROM Notification n
+    LEFT JOIN Package p ON p.package_id = n.package_id
+  `;
+
+  const params = [];
+  if (status) {
+    sql += ` WHERE n.status = ?`;
+    params.push(status);
+  }
+
+  sql += ` ORDER BY n.created_at DESC`;
+
+  try {
+    const [rows] = await db.query(sql, params);
+    res.json({
+      total: rows.length,
+      data: rows,
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// เปลี่ยนสถานะแจ้งเตือนเป็น READ
+router.patch("/:id/read", async (req, res) => {
+  const { id } = req.params;
   const sql = `UPDATE Notification SET status = 'READ' WHERE id = ?`;
 
-  db.run(sql, [id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
+  try {
+    const [result] = await db.query(sql, [id]);
 
-    if (this.changes === 0)
+    if (result.affectedRows === 0)
       return res.status(404).json({ error: "ไม่พบแจ้งเตือนนี้" });
 
     res.json({ message: "อัปเดตสถานะเป็น READ แล้ว" });
-  });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

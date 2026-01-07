@@ -1,8 +1,9 @@
 // routes/history_route.js
 const express = require('express');
 const db = require('../db');
-const requireAuth = require('../middlewares/authRequired'); // ตรวจ JWT เหมือน route อื่น
+const requireAuth = require('../middlewares/authRequired');
 const router = express.Router();
+
 
 /**
  * @swagger
@@ -110,35 +111,6 @@ const router = express.Router();
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-// ดึงประวัติการค้นหาพัสดุของ user คนนั้น + รูปพัสดุ
-router.get('/history', requireAuth, (req, res) => {
-  const sql = `
-    SELECT 
-      h.history_id,
-      h.package_id,
-      h.search_time,
-      p.sender_name,
-      p.receiver_name,
-      p.status,
-      p.province,
-      p.post_code,
-      p.package_img AS image_url  
-    FROM History h
-    LEFT JOIN Package p ON h.package_id = p.package_id
-    WHERE h.user_id = ?
-    ORDER BY datetime(h.search_time) DESC
-  `;
-
-  db.all(sql, [req.user.user_id], (err, rows) => {
-    if (err) {
-      console.error("GET /history error:", err.message);
-      return res.status(500).json({ error: err.message });
-    }
-    res.json(rows);
-  });
-});
-
-
 
 // /**
 //  * @swagger
@@ -181,16 +153,6 @@ router.get('/history', requireAuth, (req, res) => {
 //  *             schema:
 //  *               $ref: '#/components/schemas/ErrorResponse'
 //  */
-router.post('/history', requireAuth, (req, res) => {
-  const { package_id } = req.body;
-  if (!package_id) return res.status(400).json({ error: 'ต้องระบุ package_id' });
-
-  const sql = `INSERT INTO History (user_id, package_id) VALUES (?, ?)`;
-  db.run(sql, [req.user.user_id, package_id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    res.status(201).json({ message: 'เพิ่มประวัติแล้ว', history_id: this.lastID });
-  });
-});
 
 /**
  * @swagger
@@ -236,17 +198,66 @@ router.post('/history', requireAuth, (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.delete('/history/:id', requireAuth, (req, res) => {
+
+// ดึงประวัติการค้นหา
+router.get('/history', requireAuth, async (req, res) => {
+  const sql = `
+    SELECT 
+      h.history_id,
+      h.package_id,
+      h.search_time,
+      p.sender_name,
+      p.receiver_name,
+      p.status,
+      p.province,
+      p.post_code,
+      p.package_img AS image_url  
+    FROM History h
+    LEFT JOIN Package p ON h.package_id = p.package_id
+    WHERE h.user_id = ?
+    ORDER BY h.search_time DESC
+  `;
+
+  try {
+    const [rows] = await db.query(sql, [req.user.user_id]);
+    res.json(rows);
+  } catch (err) {
+    console.error("GET /history error:", err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// เพิ่มประวัติ
+router.post('/history', requireAuth, async (req, res) => {
+  const { package_id } = req.body;
+  if (!package_id) return res.status(400).json({ error: 'ต้องระบุ package_id' });
+
+  try {
+    const sql = `INSERT INTO History (user_id, package_id) VALUES (?, ?)`;
+    const [result] = await db.query(sql, [req.user.user_id, package_id]);
+    
+    res.status(201).json({ message: 'เพิ่มประวัติแล้ว', history_id: result.insertId });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ลบประวัติ
+router.delete('/history/:id', requireAuth, async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid history_id' });
 
-  const sql = `DELETE FROM History WHERE history_id = ? AND user_id = ?`;
-  db.run(sql, [id, req.user.user_id], function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-    if (this.changes === 0)
+  try {
+    const sql = `DELETE FROM History WHERE history_id = ? AND user_id = ?`;
+    const [result] = await db.query(sql, [id, req.user.user_id]);
+
+    if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'ไม่พบรายการนี้ หรือไม่ใช่ของคุณ' });
+    }
     res.status(204).send();
-  });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

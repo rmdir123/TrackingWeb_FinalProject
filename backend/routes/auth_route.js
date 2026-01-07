@@ -1,63 +1,13 @@
 // routes/auth_route.js
-const express = require('express');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const db = require('../db');
-const nodemailer = require('nodemailer');
+const express = require("express");
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const db = require("../db"); // import mysql pool
+const nodemailer = require("nodemailer");
 
 const router = express.Router();
-const isDev = process.env.NODE_ENV !== 'production';
-const authRequired = require('../middlewares/authRequired');
-
-// ---------- ตั้งค่า Nodemailer (ส่งเมล OTP) ----------
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp-relay.brevo.com',
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
-
-// เพิ่มบรรทัดนี้ชั่วคราว
-console.log('SMTP CONFIG >>>', {
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  user: process.env.SMTP_USER,
-});
-
-
-// ตรวจว่า SMTP ใช้งานได้ไหม (แค่ log ไว้เฉยๆ)
-transporter.verify((err, success) => {
-  if (err) {
-    console.warn('⚠️  SMTP not ready (check SMTP env / internet):', err.message);
-  } else {
-    console.log('✅ SMTP server is ready to send emails');
-  }
-});
-
-// ---------- สร้างตารางเก็บ OTP ถ้ายังไม่มี ----------
-const initOtpTableSql = `
-  CREATE TABLE IF NOT EXISTS PasswordResetOtp (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    user_id INTEGER NOT NULL,
-    email TEXT NOT NULL,
-    otp_code TEXT NOT NULL,
-    expires_at INTEGER NOT NULL,
-    used INTEGER NOT NULL DEFAULT 0,
-    created_at INTEGER NOT NULL,
-    ip_address TEXT,
-    FOREIGN KEY (user_id) REFERENCES User(user_id)
-  )
-`;
-db.run(initOtpTableSql, (err) => {
-  if (err) {
-    console.error('Error creating PasswordResetOtp table:', err.message);
-  } else {
-    console.log('PasswordResetOtp table ready.');
-  }
-});
+const isDev = process.env.NODE_ENV !== "production";
+const authRequired = require("../middlewares/authRequired");
 
 /**
  * @swagger
@@ -276,39 +226,6 @@ db.run(initOtpTableSql, (err) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/register', async (req, res) => {
-  try {
-    const { username, password, email, phone } = req.body;
-    if (!username || !password || !email || !phone) {
-      return res
-        .status(400)
-        .json({ error: 'ต้องกรอก username, password, email และ phone ให้ครบ' });
-    }
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'password ต้องยาวอย่างน้อย 8 ตัวอักษร' });
-    }
-
-    const hashed = await bcrypt.hash(password, 12);
-    const sql = `
-      INSERT INTO User (username, password, email, phone, role)
-      VALUES (?, ?, ?, ?, 'user')
-    `;
-    db.run(sql, [username, hashed, email, phone], function (err) {
-      if (err) {
-        if (String(err.message).includes('UNIQUE')) {
-          return res.status(409).json({ error: 'username หรือ email ถูกใช้แล้ว' });
-        }
-        return res.status(500).json({ error: err.message });
-      }
-      res.status(201).json({
-        message: 'สมัครสมาชิกสำเร็จ',
-        user: { user_id: this.lastID, username, email, phone, role: 'user' },
-      });
-    });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
 
 /**
  * @swagger
@@ -354,37 +271,6 @@ router.post('/register', async (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/login', (req, res) => {
-  const { username, password } = req.body;
-  if (!username || !password)
-    return res.status(400).json({ error: 'กรอก username และ password' });
-
-  const sql = `SELECT user_id, username, password, email, phone, role FROM User WHERE username = ?`;
-  db.get(sql, [username], async (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
-
-    const ok = await bcrypt.compare(password, row.password);
-    if (!ok) return res.status(401).json({ error: 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง' });
-
-    // ออก JWT
-    const payload = { user_id: row.user_id, role: row.role };
-    const secret = process.env.JWT_SECRET || 'dev_secret';
-    const token = jwt.sign(payload, secret, { expiresIn: '2h' });
-
-    res.json({
-      message: 'login สำเร็จ',
-      token,
-      user: {
-        user_id: row.user_id,
-        username: row.username,
-        email: row.email,
-        phone: row.phone,
-        role: row.role,
-      },
-    });
-  });
-});
 
 /**
  * @swagger
@@ -427,92 +313,6 @@ router.post('/login', (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/forgot-password', (req, res) => {
-  const { email } = req.body;
-
-  if (!email) {
-    return res.status(400).json({
-      error: 'กรุณากรอก email',
-    });
-  }
-
-  const findUserSql = `SELECT user_id, email FROM User WHERE email = ? LIMIT 1`;
-  db.get(findUserSql, [email], (err, user) => {
-    if (err) return res.status(500).json({ error: err.message });
-
-    // ถ้าไม่พบ user ก็ส่ง message เหมือนกัน (ไม่บอกให้รู้ว่า email นี้ใช้หรือยัง)
-    if (!user) {
-      return res.json({
-        message: 'หาก email นี้อยู่ในระบบ ระบบได้ส่ง OTP ไปที่อีเมลแล้ว',
-      });
-    }
-
-    const otp = String(Math.floor(100000 + Math.random() * 900000)); // OTP 6 หลัก
-    const expiresAt = Date.now() + 10 * 60 * 1000; // 10 นาที
-    const createdAt = Date.now();
-    const ipAddress =
-      (req.headers['x-forwarded-for'] || '').toString().split(',')[0].trim() ||
-      req.ip ||
-      '';
-
-    // ลบ OTP เดิมของ user นี้ทิ้งก่อน
-    const deleteOldSql = `DELETE FROM PasswordResetOtp WHERE user_id = ?`;
-    db.run(deleteOldSql, [user.user_id], (delErr) => {
-      if (delErr) {
-        console.error('Error deleting old OTP:', delErr.message);
-      }
-
-      const insertSql = `
-        INSERT INTO PasswordResetOtp (user_id, email, otp_code, expires_at, used, created_at, ip_address)
-        VALUES (?, ?, ?, ?, 0, ?, ?)
-      `;
-      db.run(
-        insertSql,
-        [user.user_id, user.email, otp, expiresAt, createdAt, ipAddress],
-        (insErr) => {
-          if (insErr) {
-            return res.status(500).json({ error: insErr.message });
-          }
-
-          // ส่งเมล OTP
-          const mailOptions = {
-            from:
-              process.env.MAIL_FROM ||
-              process.env.SMTP_USER ||
-              'no-reply@example.com',
-            to: user.email,
-            subject: 'รหัส OTP สำหรับรีเซ็ตรหัสผ่าน',
-            text: `รหัส OTP สำหรับรีเซ็ตรหัสผ่านของคุณคือ ${otp} (มีอายุ 10 นาที)\n\nถ้าคุณไม่ได้ร้องขอการรีเซ็ตรหัสผ่าน สามารถละเว้นอีเมลฉบับนี้ได้`,
-          };
-
-          transporter.sendMail(mailOptions, (mailErr, info) => {
-  if (mailErr) {
-    console.error('Error sending OTP email:', mailErr);
-    return res.status(500).json({ error: 'ไม่สามารถส่งอีเมล OTP ได้ โปรดลองใหม่อีกครั้ง' });
-  }
-
-  console.log('OTP email sent:', {
-    to: mailOptions.to,
-    messageId: info.messageId,
-    response: info.response,
-  });
-
-  const response = {
-    message: 'หาก email นี้อยู่ในระบบ ระบบได้ส่ง OTP ไปที่อีเมลแล้ว'
-  };
-
-  if (isDev) {
-    response.otp = otp;
-  }
-
-  return res.json(response);
-});
-
-        }
-      );
-    });
-  });
-});
 
 /**
  * @swagger
@@ -554,61 +354,6 @@ router.post('/forgot-password', (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/verify-otp', (req, res) => {
-  const { email, otp } = req.body;
-
-  if (!email || !otp) {
-    return res
-      .status(400)
-      .json({ error: 'กรุณากรอก email และ otp ให้ครบ' });
-  }
-
-  const now = Date.now();
-  const findOtpSql = `
-    SELECT id, user_id, email, otp_code, expires_at, used
-    FROM PasswordResetOtp
-    WHERE email = ? AND otp_code = ? AND used = 0
-    ORDER BY id DESC
-    LIMIT 1
-  `;
-
-  db.get(findOtpSql, [email, otp], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-
-    if (!row) {
-      return res.status(400).json({
-        error: 'OTP ไม่ถูกต้องหรือถูกใช้ไปแล้ว',
-      });
-    }
-
-    if (row.expires_at < now) {
-      return res.status(400).json({
-        error: 'OTP หมดอายุแล้ว',
-      });
-    }
-
-    // mark OTP as used
-    const markUsedSql = `UPDATE PasswordResetOtp SET used = 1 WHERE id = ?`;
-    db.run(markUsedSql, [row.id], (markErr) => {
-      if (markErr) {
-        console.error('Error marking OTP as used:', markErr.message);
-      }
-
-      // ออก reset_token (JWT) สำหรับใช้ใน /reset-password
-      const secret = process.env.JWT_SECRET || 'dev_secret';
-      const resetToken = jwt.sign(
-        { user_id: row.user_id, purpose: 'reset_password' },
-        secret,
-        { expiresIn: '10m' }
-      );
-
-      return res.json({
-        message: 'OTP ถูกต้อง',
-        reset_token: resetToken,
-      });
-    });
-  });
-});
 
 /**
  * @swagger
@@ -650,91 +395,329 @@ router.post('/verify-otp', (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/reset-password', (req, res) => {
-  const { reset_token, new_password } = req.body;
-
-  if (!reset_token || !new_password) {
-    return res.status(400).json({
-      error: 'กรุณากรอก reset_token และ new_password ให้ครบ',
-    });
-  }
-
-  if (new_password.length < 8) {
-    return res.status(400).json({
-      error: 'รหัสผ่านใหม่ต้องยาวอย่างน้อย 8 ตัวอักษร',
-    });
-  }
-
-  const secret = process.env.JWT_SECRET || 'dev_secret';
-
-  let decoded;
-  try {
-    decoded = jwt.verify(reset_token, secret);
-  } catch (error) {
-    return res
-      .status(400)
-      .json({ error: 'reset_token ไม่ถูกต้องหรือหมดอายุ' });
-  }
-
-  if (!decoded || !decoded.user_id || decoded.purpose !== 'reset_password') {
-    return res.status(400).json({ error: 'reset_token ไม่ถูกต้อง' });
-  }
-
-  const userId = decoded.user_id;
-
-  bcrypt
-    .hash(new_password, 12)
-    .then((hashed) => {
-      const updateUserSql = `UPDATE User SET password = ? WHERE user_id = ?`;
-      db.run(updateUserSql, [hashed, userId], (updateErr) => {
-        if (updateErr) {
-          return res.status(500).json({ error: updateErr.message });
-        }
-
-        return res.json({
-          message:
-            'เปลี่ยนรหัสผ่านสำเร็จแล้ว สามารถนำรหัสผ่านใหม่ไปใช้เข้าสู่ระบบได้',
-        });
-      });
-    })
-    .catch((hashErr) => {
-      return res.status(500).json({ error: hashErr.message });
-    });
-});
-
 
 /**
  * @swagger
  * /api/v1/auth/me:
- * get:
- * tags: [Authen]
- * summary: ดึงข้อมูลผู้ใช้จาก JWT token
- * description: "ใช้ header Authorization: Bearer <token> เพื่อดึงข้อมูลผู้ใช้ที่กำลังล็อกอินอยู่"
- * security:
- * - bearerAuth: []
- * responses:
- * 200:
- * description: ข้อมูลผู้ใช้ปัจจุบัน
- * content:
- * application/json:
- * schema:
- * $ref: '#/components/schemas/User'
- * 401:
- * description: ไม่ได้ส่ง token หรือ token ไม่ถูกต้อง
- * 404:
- * description: ไม่พบผู้ใช้ในระบบ
+ *   get:
+ *     tags: [Authen]
+ *     summary: ดึงข้อมูลผู้ใช้จาก JWT token
+ *     description: ใช้ header Authorization: Bearer <token> เพื่อดึงข้อมูลผู้ใช้ที่กำลังล็อกอินอยู่
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: ข้อมูลผู้ใช้ปัจจุบัน
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/User'
+ *       401:
+ *         description: ไม่ได้ส่ง token หรือ token ไม่ถูกต้อง
+ *       404:
+ *         description: ไม่พบผู้ใช้ในระบบ
  */
-router.get('/me', authRequired, (req, res) => {
+
+// ---------- ตั้งค่า Nodemailer ----------
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp-relay.brevo.com",
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
+
+transporter.verify((err, success) => {
+  if (err) {
+    console.warn("⚠️  SMTP not ready:", err.message);
+  } else {
+    console.log("✅ SMTP server is ready");
+  }
+});
+
+// ---------- สร้างตารางเก็บ OTP (MySQL Syntax) ----------
+const initOtpTableSql = `
+  CREATE TABLE IF NOT EXISTS PasswordResetOtp (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    otp_code VARCHAR(50) NOT NULL,
+    expires_at BIGINT NOT NULL,
+    used INT NOT NULL DEFAULT 0,
+    created_at BIGINT NOT NULL,
+    ip_address VARCHAR(255),
+    FOREIGN KEY (user_id) REFERENCES User(user_id) ON DELETE CASCADE
+  )
+`;
+
+db.query(initOtpTableSql)
+  .then(() => console.log("✅ PasswordResetOtp table checked/created."))
+  .catch((err) =>
+    console.error("❌ Error creating PasswordResetOtp table:", err.message)
+  );
+
+// ======================= Register =======================
+router.post("/register", async (req, res) => {
+  try {
+    const { username, password, email, phone } = req.body;
+    if (!username || !password || !email || !phone) {
+      return res
+        .status(400)
+        .json({ error: "ต้องกรอก username, password, email และ phone ให้ครบ" });
+    }
+    if (password.length < 8) {
+      return res
+        .status(400)
+        .json({ error: "password ต้องยาวอย่างน้อย 8 ตัวอักษร" });
+    }
+
+    const hashed = await bcrypt.hash(password, 12);
+    const sql = `
+      INSERT INTO User (username, password, email, phone, role)
+      VALUES (?, ?, ?, ?, 'user')
+    `;
+
+    try {
+      const [result] = await db.query(sql, [username, hashed, email, phone]);
+      res.status(201).json({
+        message: "สมัครสมาชิกสำเร็จ",
+        user: {
+          user_id: result.insertId,
+          username,
+          email,
+          phone,
+          role: "user",
+        },
+      });
+    } catch (dbErr) {
+      // Error code 1062 คือ Duplicate entry ใน MySQL
+      if (dbErr.code === "ER_DUP_ENTRY") {
+        return res
+          .status(409)
+          .json({ error: "username หรือ email ถูกใช้แล้ว" });
+      }
+      throw dbErr;
+    }
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ======================= Login =======================
+router.post("/login", async (req, res) => {
+  const { username, password } = req.body;
+  if (!username || !password)
+    return res.status(400).json({ error: "กรอก username และ password" });
+
+  try {
+    const sql = `SELECT user_id, username, password, email, phone, role FROM User WHERE username = ?`;
+    const [rows] = await db.query(sql, [username]);
+
+    if (rows.length === 0) {
+      return res
+        .status(401)
+        .json({ error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
+    }
+    const row = rows[0];
+
+    const ok = await bcrypt.compare(password, row.password);
+    if (!ok)
+      return res
+        .status(401)
+        .json({ error: "ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง" });
+
+    // ออก JWT
+    const payload = { user_id: row.user_id, role: row.role };
+    const secret = process.env.JWT_SECRET || "dev_secret";
+    const token = jwt.sign(payload, secret, { expiresIn: "2h" });
+
+    res.json({
+      message: "login สำเร็จ",
+      token,
+      user: {
+        user_id: row.user_id,
+        username: row.username,
+        email: row.email,
+        phone: row.phone,
+        role: row.role,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// ======================= Forgot Password =======================
+router.post("/forgot-password", async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ error: "กรุณากรอก email" });
+
+  try {
+    const findUserSql = `SELECT user_id, email FROM User WHERE email = ? LIMIT 1`;
+    const [users] = await db.query(findUserSql, [email]);
+    const user = users[0];
+
+    if (!user) {
+      return res.json({
+        message: "หาก email นี้อยู่ในระบบ ระบบได้ส่ง OTP ไปที่อีเมลแล้ว",
+      });
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = Date.now() + 10 * 60 * 1000;
+    const createdAt = Date.now();
+    const ipAddress =
+      (req.headers["x-forwarded-for"] || "").toString().split(",")[0].trim() ||
+      req.ip ||
+      "";
+
+    // ลบ OTP เดิม
+    await db.query(`DELETE FROM PasswordResetOtp WHERE user_id = ?`, [
+      user.user_id,
+    ]);
+
+    // Insert OTP ใหม่
+    const insertSql = `
+      INSERT INTO PasswordResetOtp (user_id, email, otp_code, expires_at, used, created_at, ip_address)
+      VALUES (?, ?, ?, ?, 0, ?, ?)
+    `;
+    await db.query(insertSql, [
+      user.user_id,
+      user.email,
+      otp,
+      expiresAt,
+      createdAt,
+      ipAddress,
+    ]);
+
+    // ส่งเมล
+    const mailOptions = {
+      from:
+        process.env.MAIL_FROM ||
+        process.env.SMTP_USER ||
+        "no-reply@example.com",
+      to: user.email,
+      subject: "รหัส OTP สำหรับรีเซ็ตรหัสผ่าน",
+      text: `รหัส OTP สำหรับรีเซ็ตรหัสผ่านของคุณคือ ${otp} (มีอายุ 10 นาที)\n\nถ้าคุณไม่ได้ร้องขอการรีเซ็ตรหัสผ่าน สามารถละเว้นอีเมลฉบับนี้ได้`,
+    };
+
+    transporter.sendMail(mailOptions, (mailErr, info) => {
+      if (mailErr) {
+        console.error("Error sending OTP email:", mailErr);
+        return res
+          .status(500)
+          .json({ error: "ไม่สามารถส่งอีเมล OTP ได้ โปรดลองใหม่อีกครั้ง" });
+      }
+
+      const response = {
+        message: "หาก email นี้อยู่ในระบบ ระบบได้ส่ง OTP ไปที่อีเมลแล้ว",
+      };
+      if (isDev) response.otp = otp;
+
+      return res.json(response);
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ======================= Verify OTP =======================
+router.post("/verify-otp", async (req, res) => {
+  const { email, otp } = req.body;
+  if (!email || !otp)
+    return res.status(400).json({ error: "กรุณากรอก email และ otp ให้ครบ" });
+
+  const now = Date.now();
+  const findOtpSql = `
+    SELECT id, user_id, email, otp_code, expires_at, used
+    FROM PasswordResetOtp
+    WHERE email = ? AND otp_code = ? AND used = 0
+    ORDER BY id DESC
+    LIMIT 1
+  `;
+
+  try {
+    const [rows] = await db.query(findOtpSql, [email, otp]);
+    if (rows.length === 0) {
+      return res.status(400).json({ error: "OTP ไม่ถูกต้องหรือถูกใช้ไปแล้ว" });
+    }
+    const row = rows[0];
+
+    if (row.expires_at < now) {
+      return res.status(400).json({ error: "OTP หมดอายุแล้ว" });
+    }
+
+    // mark used
+    await db.query(`UPDATE PasswordResetOtp SET used = 1 WHERE id = ?`, [
+      row.id,
+    ]);
+
+    const secret = process.env.JWT_SECRET || "dev_secret";
+    const resetToken = jwt.sign(
+      { user_id: row.user_id, purpose: "reset_password" },
+      secret,
+      { expiresIn: "10m" }
+    );
+
+    return res.json({ message: "OTP ถูกต้อง", reset_token: resetToken });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ======================= Reset Password =======================
+router.post("/reset-password", async (req, res) => {
+  const { reset_token, new_password } = req.body;
+  if (!reset_token || !new_password)
+    return res.status(400).json({ error: "กรอกข้อมูลไม่ครบ" });
+  if (new_password.length < 8)
+    return res
+      .status(400)
+      .json({ error: "รหัสผ่านใหม่ต้องยาวอย่างน้อย 8 ตัวอักษร" });
+
+  const secret = process.env.JWT_SECRET || "dev_secret";
+  let decoded;
+  try {
+    decoded = jwt.verify(reset_token, secret);
+  } catch (error) {
+    return res.status(400).json({ error: "reset_token ไม่ถูกต้องหรือหมดอายุ" });
+  }
+
+  if (!decoded || !decoded.user_id || decoded.purpose !== "reset_password") {
+    return res.status(400).json({ error: "reset_token ไม่ถูกต้อง" });
+  }
+
+  try {
+    const hashed = await bcrypt.hash(new_password, 12);
+    await db.query(`UPDATE User SET password = ? WHERE user_id = ?`, [
+      hashed,
+      decoded.user_id,
+    ]);
+
+    return res.json({
+      message:
+        "เปลี่ยนรหัสผ่านสำเร็จแล้ว สามารถนำรหัสผ่านใหม่ไปใช้เข้าสู่ระบบได้",
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ======================= Me =======================
+router.get("/me", authRequired, async (req, res) => {
   const sql = `
     SELECT user_id, username, email, phone, role
     FROM User
     WHERE user_id = ?
   `;
-  db.get(sql, [req.user.user_id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'User not found' });
+  try {
+    const [rows] = await db.query(sql, [req.user.user_id]);
+    if (rows.length === 0)
+      return res.status(404).json({ error: "User not found" });
 
-    // ส่ง object user ตรง ๆ กลับไป
+    const row = rows[0];
     return res.json({
       user_id: row.user_id,
       username: row.username,
@@ -742,12 +725,9 @@ router.get('/me', authRequired, (req, res) => {
       phone: row.phone,
       role: row.role,
     });
-  });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
-
-
-
-
 module.exports = router;
-

@@ -4,47 +4,6 @@ const db = require('../db');
 const jwt = require('jsonwebtoken');
 const router = express.Router();
 
-/* ==============================
-   Auth middleware (Bearer JWT)
-   ============================== */
-function authRequired(req, res, next) {
-  const auth = req.headers.authorization || '';
-  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
-  if (!token) return res.status(401).json({ error: 'Unauthorized' });
-
-  try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
-    // payload ควรมี user_id และ role
-    req.user = { user_id: payload.user_id, role: payload.role };
-    next();
-  } catch (e) {
-    return res.status(401).json({ error: 'Invalid token' });
-  }
-}
-
-// ตรวจสิทธิ์ role แบบง่าย
-function requireRole(role) {
-  return (req, res, next) => {
-    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
-    if (req.user.role !== role) {
-      return res.status(403).json({ error: `ต้องเป็นผู้ใช้ระดับ ${role} เท่านั้น` });
-    }
-    next();
-  };
-}
-
-/* ==============================
-   Helpers: type safety เบาๆ
-   ============================== */
-function n(v) {
-  if (v === undefined || v === null || v === '') return null;
-  const x = Number(v);
-  return Number.isFinite(x) ? x : null;
-}
-function s(v) {
-  if (v === undefined || v === null || v === '') return null;
-  return String(v);
-}
 
 /**
  * @swagger
@@ -267,59 +226,6 @@ function s(v) {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.post('/addpackage', (req, res) => {
-  const {
-    height,
-    width,
-    sender_name,
-    receiver_name,
-    sender_tel,
-    receiver_tel,
-    address,
-    status,
-    material_type,
-    province,
-    post_code,
-    ocr_result,
-    package_img,
-    modify_by
-  } = req.body || {};
-
-  const now = new Date().toISOString();
-
-  const sql = `
-    INSERT INTO Package (
-      height, width, sender_name, receiver_name, sender_tel, receiver_tel,
-      address, status, material_type, province, post_code,
-      fragile, ocr_result, created_time, updated_time, package_img, modify_by
-    )
-    VALUES (?,?,?,?,?,?,?,?,?,?,?, 0, ?, ?, ?, ?, ?)
-  `;
-
-  const params = [
-    n(height), n(width), s(sender_name), s(receiver_name), s(sender_tel), s(receiver_tel),
-    s(address), s(status), s(material_type), s(province), s(post_code),
-    s(ocr_result), now, now, s(package_img), (modify_by ?? null)
-  ];
-
-  db.run(sql, params, function (err) {
-    if (err) return res.status(500).json({ error: err.message });
-
-    const newId = this.lastID;
-    const selectSql = `
-      SELECT package_id, height, width, sender_name, receiver_name,
-             sender_tel, receiver_tel, address, status, material_type,
-             province, post_code, fragile, ocr_result,
-             created_time, updated_time, package_img, modify_by
-      FROM Package
-      WHERE package_id = ?
-    `;
-    db.get(selectSql, [newId], (err2, row) => {
-      if (err2) return res.status(500).json({ error: err2.message });
-      res.status(201).json({ message: 'Package added successfully', data: row });
-    });
-  });
-});
 
 /**
  * @swagger
@@ -357,37 +263,6 @@ router.post('/addpackage', (req, res) => {
  *             schema:
  *               $ref: '#/components/schemas/ErrorResponse'
  */
-router.get('/packages', (req, res) => {
-  const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
-  const offset = parseInt(req.query.offset || '0', 10);
-  const order = (req.query.order || 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
-
-  const sql = `
-    SELECT package_id, height, width, sender_name, receiver_name,
-           sender_tel, receiver_tel, address, status, material_type,
-           province, post_code, fragile, ocr_result,
-           created_time, updated_time, package_img, modify_by
-    FROM Package
-    ORDER BY datetime(created_time) ${order}
-    LIMIT ? OFFSET ?
-  `;
-
-  db.all(sql, [limit, offset], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-
-    db.get(`SELECT COUNT(*) AS total FROM Package`, [], (err2, countRow) => {
-      if (err2) return res.status(500).json({ error: err2.message });
-      res.json({
-        total: countRow?.total ?? rows.length,
-        limit,
-        offset,
-        order: order.toLowerCase(),
-        data: rows
-      });
-    });
-  });
-});
-
 
 /**
  * @swagger
@@ -447,50 +322,6 @@ router.get('/packages', (req, res) => {
  *       500:
  *         description: มีข้อผิดพลาดจากฝั่งเซิร์ฟเวอร์
  */
-router.get('/package/ocrfail', (req, res) => {
-  const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
-  const offset = parseInt(req.query.offset || '0', 10);
-  const order = (req.query.order || 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
-
-  const sql = `
-    SELECT package_id, height, width, sender_name, receiver_name,
-           sender_tel, receiver_tel, address, status, material_type,
-           province, post_code, fragile, ocr_result,
-           created_time, updated_time, package_img, modify_by
-    FROM Package
-    WHERE status IN ('OCR_Fail', 'OCR_Update', 'Return_Package')
-    ORDER BY datetime(created_time) ${order}
-    LIMIT ? OFFSET ?
-  `;
-
-  db.all(sql, [limit, offset], (err, rows) => {
-    if (err) {
-      return res.status(500).json({ error: err.message });
-    }
-
-    const countSql = `
-      SELECT COUNT(*) AS total
-      FROM Package
-      WHERE status IN ('OCR_Fail', 'OCR_Update', 'Return_Package')
-    `;
-
-    db.get(countSql, [], (err2, countRow) => {
-      if (err2) {
-        return res.status(500).json({ error: err2.message });
-      }
-
-      res.json({
-        total: countRow?.total ?? rows.length,
-        limit,
-        offset,
-        order: order.toLowerCase(),
-        data: rows
-      });
-    });
-  });
-});
-
-
 
 /**
  * @swagger
@@ -526,26 +357,6 @@ router.get('/package/ocrfail', (req, res) => {
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
-router.get(
-  '/packages/edited',
-  authRequired,
-  requireRole('system_manager'),
-  (req, res) => {
-    const sql = `
-      SELECT package_id, height, width, sender_name, receiver_name,
-             sender_tel, receiver_tel, address, status, material_type,
-             province, post_code, fragile, ocr_result,
-             created_time, updated_time, package_img, modify_by
-      FROM Package
-      WHERE modify_by IS NOT NULL AND TRIM(CAST(modify_by AS TEXT)) <> ''
-      ORDER BY datetime(COALESCE(updated_time, created_time)) DESC
-    `;
-    db.all(sql, [], (err, rows) => {
-      if (err) return res.status(500).json({ error: err.message });
-      res.json(rows);
-    });
-  }
-);
 
 /**
  * @swagger
@@ -582,28 +393,6 @@ router.get(
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
-router.get('/packages/:id', (req, res) => {
-  const id = parseInt(req.params.id, 10);
-  if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid id' });
-
-  const sql = `
-    SELECT package_id, height, width, sender_name, receiver_name,
-           sender_tel, receiver_tel, address, status, material_type,
-           province, post_code, fragile, ocr_result,
-           created_time, updated_time, package_img, modify_by
-    FROM Package
-    WHERE package_id = ?
-  `;
-
-  db.get(sql, [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'Not found' });
-    res.json(row);
-  });
-});
-
-
-
 
 /**
  * @swagger
@@ -686,71 +475,6 @@ router.get('/packages/:id', (req, res) => {
  *         description: Database error
  */
 
-
-// ======================= API: UPDATE PACKAGE =========================
-
-router.put("/packages/:id", authRequired, (req, res) => {
-  const { id } = req.params;
-
-  const {
-    sender_name,
-    receiver_name,
-    sender_tel,
-    receiver_tel,
-    address,
-    status,
-  } = req.body;
-
-  const modify_by = req.user.user_id;   // <<< ดึงจาก JWT Token
-
-  const sql = `
-    UPDATE Package
-    SET
-      sender_name   = ?,
-      receiver_name = ?,
-      sender_tel    = ?,
-      receiver_tel  = ?,
-      address       = ?,
-      status        = ?,
-      modify_by     = ?,       
-      updated_time  = datetime('now', 'localtime')
-    WHERE package_id = ?;
-  `;
-
-  const params = [
-    sender_name,
-    receiver_name,
-    sender_tel,
-    receiver_tel,
-    address,
-    status,
-    modify_by,
-    id,
-  ];
-
-  db.run(sql, params, function (err) {
-    if (err) {
-      console.error("DB error:", err);
-      return res.status(500).json({ message: "Database error" });
-    }
-
-    if (this.changes === 0) {
-      return res.status(404).json({ message: "Package not found" });
-    }
-
-    res.json({
-      message: "Package updated successfully",
-      package_id: id,
-      modify_by: modify_by,
-    });
-  });
-});
-
-
-
-
-
-
 /**
  * @swagger
  * /api/v1/secure/packages/{id}:
@@ -793,7 +517,190 @@ router.put("/packages/:id", authRequired, (req, res) => {
  *           application/json:
  *             schema: { $ref: '#/components/schemas/ErrorResponse' }
  */
-router.get('/secure/packages/:id', authRequired, (req, res) => {
+
+/* ==============================
+   Auth middleware (Inline)
+   ============================== */
+function authRequired(req, res, next) {
+  const auth = req.headers.authorization || '';
+  const token = auth.startsWith('Bearer ') ? auth.slice(7) : null;
+  if (!token) return res.status(401).json({ error: 'Unauthorized' });
+
+  try {
+    const payload = jwt.verify(token, process.env.JWT_SECRET || 'dev_secret');
+    req.user = { user_id: payload.user_id, role: payload.role };
+    next();
+  } catch (e) {
+    return res.status(401).json({ error: 'Invalid token' });
+  }
+}
+
+// ตรวจสิทธิ์ role
+function requireRole(role) {
+  return (req, res, next) => {
+    if (!req.user) return res.status(401).json({ error: 'Unauthorized' });
+    if (req.user.role !== role) {
+      return res.status(403).json({ error: `ต้องเป็นผู้ใช้ระดับ ${role} เท่านั้น` });
+    }
+    next();
+  };
+}
+
+/* ==============================
+   Helpers
+   ============================== */
+function n(v) {
+  if (v === undefined || v === null || v === '') return null;
+  const x = Number(v);
+  return Number.isFinite(x) ? x : null;
+}
+function s(v) {
+  if (v === undefined || v === null || v === '') return null;
+  return String(v);
+}
+
+// ======================= API START =========================
+
+// เพิ่มพัสดุใหม่
+router.post('/addpackage', async (req, res) => {
+  const {
+    height, width, sender_name, receiver_name, sender_tel, receiver_tel,
+    address, status, material_type, province, post_code,
+    ocr_result, package_img, modify_by
+  } = req.body || {};
+
+  // MySQL ใช้ NOW() ได้ แต่ส่งค่าไปเลยก็สะดวกเหมือนกัน
+  const now = new Date(); 
+
+  const sql = `
+    INSERT INTO Package (
+      height, width, sender_name, receiver_name, sender_tel, receiver_tel,
+      address, status, material_type, province, post_code,
+      fragile, ocr_result, created_time, updated_time, package_img, modify_by
+    )
+    VALUES (?,?,?,?,?,?,?,?,?,?,?, 0, ?, ?, ?, ?, ?)
+  `;
+
+  const params = [
+    n(height), n(width), s(sender_name), s(receiver_name), s(sender_tel), s(receiver_tel),
+    s(address), s(status), s(material_type), s(province), s(post_code),
+    s(ocr_result), now, now, s(package_img), (modify_by ?? null)
+  ];
+
+  try {
+    const [result] = await db.query(sql, params);
+    const newId = result.insertId;
+
+    const selectSql = `
+      SELECT package_id, height, width, sender_name, receiver_name,
+             sender_tel, receiver_tel, address, status, material_type,
+             province, post_code, fragile, ocr_result,
+             created_time, updated_time, package_img, modify_by
+      FROM Package
+      WHERE package_id = ?
+    `;
+    const [rows] = await db.query(selectSql, [newId]);
+    res.status(201).json({ message: 'Package added successfully', data: rows[0] });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// รายการพัสดุ (Pagination)
+router.get('/packages', async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+  const offset = parseInt(req.query.offset || '0', 10);
+  const order = (req.query.order || 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+  // MySQL: ใช้ created_time ตรงๆ ไม่ต้อง datetime()
+  const sql = `
+    SELECT package_id, height, width, sender_name, receiver_name,
+           sender_tel, receiver_tel, address, status, material_type,
+           province, post_code, fragile, ocr_result,
+           created_time, updated_time, package_img, modify_by
+    FROM Package
+    ORDER BY created_time ${order}
+    LIMIT ? OFFSET ?
+  `;
+
+  try {
+    const [rows] = await db.query(sql, [limit, offset]);
+    const [countRows] = await db.query(`SELECT COUNT(*) AS total FROM Package`);
+    
+    res.json({
+      total: countRows[0]?.total ?? rows.length,
+      limit,
+      offset,
+      order: order.toLowerCase(),
+      data: rows
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ดึงรายการพัสดุที่เคยมีปัญหา OCR
+router.get('/package/ocrfail', async (req, res) => {
+  const limit = Math.min(parseInt(req.query.limit || '50', 10), 200);
+  const offset = parseInt(req.query.offset || '0', 10);
+  const order = (req.query.order || 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+  const sql = `
+    SELECT package_id, height, width, sender_name, receiver_name,
+           sender_tel, receiver_tel, address, status, material_type,
+           province, post_code, fragile, ocr_result,
+           created_time, updated_time, package_img, modify_by
+    FROM Package
+    WHERE status IN ('OCR_Fail', 'OCR_Update', 'Return_Package')
+    ORDER BY created_time ${order}
+    LIMIT ? OFFSET ?
+  `;
+
+  try {
+    const [rows] = await db.query(sql, [limit, offset]);
+    
+    const countSql = `
+      SELECT COUNT(*) AS total
+      FROM Package
+      WHERE status IN ('OCR_Fail', 'OCR_Update', 'Return_Package')
+    `;
+    const [countRows] = await db.query(countSql);
+
+    res.json({
+      total: countRows[0]?.total ?? rows.length,
+      limit,
+      offset,
+      order: order.toLowerCase(),
+      data: rows
+    });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// (system manager) ดึงพัสดุทั้งหมดที่ถูกแก้ไข
+router.get('/packages/edited', authRequired, requireRole('system_manager'), async (req, res) => {
+  // MySQL: ใช้ modify_by IS NOT NULL ก็พอ (หรือ check empty string ด้วยก็ได้)
+  const sql = `
+    SELECT package_id, height, width, sender_name, receiver_name,
+           sender_tel, receiver_tel, address, status, material_type,
+           province, post_code, fragile, ocr_result,
+           created_time, updated_time, package_img, modify_by
+    FROM Package
+    WHERE modify_by IS NOT NULL 
+    ORDER BY COALESCE(updated_time, created_time) DESC
+  `;
+  try {
+    const [rows] = await db.query(sql);
+    res.json(rows);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ดึงพัสดุตาม ID
+router.get('/packages/:id', async (req, res) => {
   const id = parseInt(req.params.id, 10);
   if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid id' });
 
@@ -806,17 +713,85 @@ router.get('/secure/packages/:id', authRequired, (req, res) => {
     WHERE package_id = ?
   `;
 
-  db.get(sql, [id], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'Not found' });
+  try {
+    const [rows] = await db.query(sql, [id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
 
-    // บันทึกประวัติการค้นหา (History) — เฉพาะผู้ใช้ที่ล็อกอิน
-    const insertHis = `INSERT INTO History (user_id, package_id) VALUES (?, ?)`;
-    db.run(insertHis, [req.user.user_id, row.package_id], (e) => {
-      if (e) console.error('History insert error:', e.message);
-      res.json(row);
+// Update Package (OCR Edit Page)
+router.put("/packages/:id", authRequired, async (req, res) => {
+  const { id } = req.params;
+  const {
+    sender_name, receiver_name, sender_tel, receiver_tel, address, status,
+  } = req.body;
+  const modify_by = req.user.user_id;
+
+  // MySQL ใช้ NOW() แทน datetime('now')
+  const sql = `
+    UPDATE Package
+    SET
+      sender_name   = ?,
+      receiver_name = ?,
+      sender_tel    = ?,
+      receiver_tel  = ?,
+      address       = ?,
+      status        = ?,
+      modify_by     = ?,       
+      updated_time  = NOW()
+    WHERE package_id = ?;
+  `;
+
+  const params = [
+    sender_name, receiver_name, sender_tel, receiver_tel, address, status, modify_by, id,
+  ];
+
+  try {
+    const [result] = await db.query(sql, params);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: "Package not found" });
+    }
+
+    res.json({
+      message: "Package updated successfully",
+      package_id: id,
+      modify_by: modify_by,
     });
-  });
+  } catch (err) {
+    console.error("DB error:", err);
+    return res.status(500).json({ message: "Database error" });
+  }
+});
+
+// Secure Get Package + History Log
+router.get('/secure/packages/:id', authRequired, async (req, res) => {
+  const id = parseInt(req.params.id, 10);
+  if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid id' });
+
+  const sql = `
+    SELECT package_id, height, width, sender_name, receiver_name,
+           sender_tel, receiver_tel, address, status, material_type,
+           province, post_code, fragile, ocr_result,
+           created_time, updated_time, package_img, modify_by
+    FROM Package
+    WHERE package_id = ?
+  `;
+
+  try {
+    const [rows] = await db.query(sql, [id]);
+    if (rows.length === 0) return res.status(404).json({ error: 'Not found' });
+
+    // บันทึก History (ไม่ต้อง await ก็ได้ถ้าไม่อยากให้บล็อก response แต่ใส่ไว้เพื่อความชัวร์)
+    const insertHis = `INSERT INTO History (user_id, package_id) VALUES (?, ?)`;
+    await db.query(insertHis, [req.user.user_id, rows[0].package_id]).catch(e => console.error('History log error', e));
+
+    res.json(rows[0]);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;

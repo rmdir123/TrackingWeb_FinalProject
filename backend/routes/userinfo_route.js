@@ -5,6 +5,7 @@ const authRequired = require('../middlewares/authRequired');
 
 const router = express.Router();
 
+
 /**
  * @swagger
  * tags:
@@ -70,22 +71,6 @@ const router = express.Router();
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get('/userinfo', authRequired, (req, res) => {
-  // ตรวจสอบสิทธิ์ admin
-  if (req.user.role !== 'admin') {
-    return res.status(403).json({ error: 'Forbidden: admin only' });
-  }
-
-  const sql = `
-    SELECT user_id, username, email, phone, role
-    FROM User
-  `;
-
-  db.all(sql, [], (err, rows) => {
-    if (err) return res.status(500).json({ error: err.message });
-    res.json(rows);
-  });
-});
 
 /**
  * @swagger
@@ -112,25 +97,6 @@ router.get('/userinfo', authRequired, (req, res) => {
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get('/userinfo/me', authRequired, (req, res) => {
-  const userId = req.user.user_id; // มาจาก payload ใน authRequired
-
-  const sql = `
-    SELECT user_id, username, email, phone, role
-    FROM User
-    WHERE user_id = ?
-  `;
-
-  db.get(sql, [userId], (err, row) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!row) return res.status(404).json({ error: 'User not found' });
-    res.json(row);
-  });
-});
-
-module.exports = router;
-
-
 
 /**
  * @swagger
@@ -176,8 +142,49 @@ module.exports = router;
  *       500:
  *         description: เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.put('/userinfo/me', authRequired, (req, res) => {
-  const userId = req.user.user_id;   // มาจาก payload ใน authRequired
+
+// ดึงข้อมูลผู้ใช้ทั้งหมด (admin เท่านั้น)
+router.get('/userinfo', authRequired, async (req, res) => {
+  // ตรวจสอบสิทธิ์ admin
+  if (req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Forbidden: admin only' });
+  }
+
+  const sql = `
+    SELECT user_id, username, email, phone, role
+    FROM User
+  `;
+
+  try {
+    const [rows] = await db.query(sql);
+    res.json(rows);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ดึงข้อมูลของผู้ใช้ที่กำลังเข้าสู่ระบบอยู่
+router.get('/userinfo/me', authRequired, async (req, res) => {
+  const userId = req.user.user_id;
+
+  const sql = `
+    SELECT user_id, username, email, phone, role
+    FROM User
+    WHERE user_id = ?
+  `;
+
+  try {
+    const [rows] = await db.query(sql, [userId]);
+    if (rows.length === 0) return res.status(404).json({ error: 'User not found' });
+    res.json(rows[0]);
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// แก้ไขข้อมูลของผู้ใช้ที่กำลังเข้าสู่ระบบ (เฉพาะเบอร์โทรศัพท์)
+router.put('/userinfo/me', authRequired, async (req, res) => {
+  const userId = req.user.user_id;
   const { phone } = req.body;
 
   if (!phone) {
@@ -190,13 +197,10 @@ router.put('/userinfo/me', authRequired, (req, res) => {
     WHERE user_id = ?
   `;
 
-  db.run(sql, [phone, userId], function (err) {
-    if (err) {
-      console.error('Update phone error:', err);
-      return res.status(500).json({ error: 'อัปเดตหมายเลขโทรศัพท์ไม่สำเร็จ' });
-    }
+  try {
+    const [result] = await db.query(sql, [phone, userId]);
 
-    if (this.changes === 0) {
+    if (result.affectedRows === 0) {
       return res.status(404).json({ error: 'User not found' });
     }
 
@@ -204,5 +208,10 @@ router.put('/userinfo/me', authRequired, (req, res) => {
       message: 'อัปเดตหมายเลขโทรศัพท์เรียบร้อยแล้ว',
       phone,
     });
-  });
+  } catch (err) {
+    console.error('Update phone error:', err);
+    return res.status(500).json({ error: 'อัปเดตหมายเลขโทรศัพท์ไม่สำเร็จ' });
+  }
 });
+
+module.exports = router;

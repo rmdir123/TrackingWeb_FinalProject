@@ -1,12 +1,9 @@
 // routes/admin_user_route.js
 const express = require("express");
 const router = express.Router();
-const db = require("../db");
-const bcrypt = require("bcrypt"); // ใช้ตัวเดียวกับ auth_route
+const db = require("../db"); 
+const bcrypt = require("bcrypt");
 const authRequired = require("../middlewares/authRequired");
-
-
-
 
 /**
  * @swagger
@@ -27,38 +24,6 @@ const authRequired = require("../middlewares/authRequired");
  *       500:
  *         description: ข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.get("/admins", (req, res) => {
-  const sql = `
-    SELECT user_id, username, email, phone, role
-    FROM User
-    WHERE role = 'admin'
-  `;
-
-  db.all(sql, [], (err, rows) => {
-    if (err) {
-      console.error("Error fetching admins:", err.message);
-      return res.status(500).json({ error: err.message });
-    }
-
-    return res.json(rows || []);
-  });
-});
-
-
-
-
-
-// ใช้ middleware authRequired กับทุก endpoint ในไฟล์นี้
-router.use(authRequired);
-
-// ===== Helper: เช็คว่า caller เป็น role อะไร =====
-function isSystemManager(req) {
-  return req.user && req.user.role === "system_manager";
-}
-
-function isAdmin(req) {
-  return req.user && req.user.role === "admin";
-}
 
 /**
  * @swagger
@@ -127,7 +92,6 @@ function isAdmin(req) {
  *           example: "admin"
  */
 
-// ======================= 1) สร้างผู้ใช้ใหม่ =======================
 /**
  * @swagger
  * /api/v1/admin/users:
@@ -157,83 +121,7 @@ function isAdmin(req) {
  *       500:
  *         description: ข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.post("/users", async (req, res) => {
-  try {
-    const { username, password, email, phone, role } = req.body;
 
-    // ❌ ถ้าไม่ใช่ system_manager ห้ามสร้างใครทั้งนั้น
-    if (!isSystemManager(req)) {
-      return res.status(403).json({
-        error: "เฉพาะ system_manager เท่านั้นที่สามารถสร้างผู้ใช้ได้",
-      });
-    }
-
-    if (!username || !password || !email || !phone) {
-      return res.status(400).json({
-        error: "ต้องกรอก username, password, email และ phone ให้ครบ",
-      });
-    }
-
-    if (password.length < 8) {
-      return res
-        .status(400)
-        .json({ error: "password ต้องยาวอย่างน้อย 8 ตัวอักษร" });
-    }
-
-    // ✅ system_manager สร้างได้แค่ admin เท่านั้น
-    if (role && role !== "admin") {
-      return res.status(400).json({
-        error:
-          'system_manager สามารถสร้างได้เฉพาะผู้ใช้ที่มี role = "admin" เท่านั้น',
-      });
-    }
-    const newRole = "admin";
-
-    // เช็ค username / email ซ้ำ
-    const checkSql = `SELECT user_id FROM User WHERE username = ? OR email = ? LIMIT 1`;
-    db.get(checkSql, [username, email], async (err, row) => {
-      if (err) {
-        return res.status(500).json({ error: err.message });
-      }
-      if (row) {
-        return res
-          .status(409)
-          .json({ error: "username หรือ email ถูกใช้แล้ว" });
-      }
-
-      const hashed = await bcrypt.hash(password, 12);
-
-      const insertSql = `
-        INSERT INTO User (username, password, email, phone, role)
-        VALUES (?, ?, ?, ?, ?)
-      `;
-      db.run(
-        insertSql,
-        [username, hashed, email, phone, newRole],
-        function (err2) {
-          if (err2) {
-            return res.status(500).json({ error: err2.message });
-          }
-
-          return res.status(201).json({
-            message: "สร้างผู้ใช้สำเร็จ",
-            user: {
-              user_id: this.lastID,
-              username,
-              email,
-              phone,
-              role: newRole,
-            },
-          });
-        }
-      );
-    });
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
-  }
-});
-
-// ======================= 2) แก้ไขข้อมูลผู้ใช้ =======================
 /**
  * @swagger
  * /api/v1/admin/users/{user_id}:
@@ -272,91 +160,7 @@ router.post("/users", async (req, res) => {
  *       500:
  *         description: ข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.put("/users/:user_id", (req, res) => {
-  const targetId = req.params.user_id;
-  const { username, email, phone, role } = req.body;
-  const callerRole = req.user.role;
 
-  // ดึงข้อมูล user เป้าหมายมาก่อน
-  const findSql = `SELECT user_id, username, email, phone, role FROM User WHERE user_id = ?`;
-  db.get(findSql, [targetId], (err, existing) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!existing)
-      return res.status(404).json({ error: "ไม่พบผู้ใช้ที่ต้องการแก้ไข" });
-
-    const targetRole = existing.role;
-
-    // Rule 1: admin ห้ามแก้ข้อมูลของ admin หรือ system_manager
-    if (isAdmin(req) && ["admin", "system_manager"].includes(targetRole)) {
-      return res.status(403).json({
-        error:
-          "admin ไม่สามารถแก้ไขข้อมูลของผู้ใช้ที่เป็น admin หรือ system_manager ได้",
-      });
-    }
-
-    // Rule 2: admin ห้ามเปลี่ยน role ใครให้เป็น admin หรือ system_manager
-    if (isAdmin(req) && role && ["admin", "system_manager"].includes(role)) {
-      return res.status(403).json({
-        error:
-          "admin ไม่สามารถเปลี่ยน role ให้เป็น admin หรือ system_manager ได้",
-      });
-    }
-
-    const fields = [];
-    const values = [];
-
-    if (username) {
-      fields.push("username = ?");
-      values.push(username);
-    }
-    if (email) {
-      fields.push("email = ?");
-      values.push(email);
-    }
-    if (phone) {
-      fields.push("phone = ?");
-      values.push(phone);
-    }
-    if (role) {
-      fields.push("role = ?");
-      values.push(role);
-    }
-
-    if (fields.length === 0) {
-      return res
-        .status(400)
-        .json({ error: "ไม่มีข้อมูลที่ต้องการแก้ไข (body ว่าง)" });
-    }
-
-    values.push(targetId);
-
-    const updateSql = `UPDATE User SET ${fields.join(", ")} WHERE user_id = ?`;
-    db.run(updateSql, values, function (err2) {
-      if (err2) return res.status(500).json({ error: err2.message });
-
-      if (this.changes === 0) {
-        return res
-          .status(404)
-          .json({ error: "ไม่พบผู้ใช้ที่ต้องการแก้ไข (หลังอัปเดต)" });
-      }
-
-      // ดึงข้อมูลล่าสุดกลับไปให้
-      db.get(
-        `SELECT user_id, username, email, phone, role FROM User WHERE user_id = ?`,
-        [targetId],
-        (err3, row) => {
-          if (err3) return res.status(500).json({ error: err3.message });
-          return res.json({
-            message: "แก้ไขข้อมูลสำเร็จ",
-            user: row,
-          });
-        }
-      );
-    });
-  });
-});
-
-// ======================= 3) ลบผู้ใช้ =======================
 /**
  * @swagger
  * /api/v1/admin/users/{user_id}:
@@ -385,38 +189,173 @@ router.put("/users/:user_id", (req, res) => {
  *       500:
  *         description: ข้อผิดพลาดภายในเซิร์ฟเวอร์
  */
-router.delete("/users/:user_id", (req, res) => {
+
+
+
+/**
+ * ดึงข้อมูลผู้ใช้ที่มี role = admin ทั้งหมด
+ */
+router.get("/admins", async (req, res) => {
+  const sql = `
+    SELECT user_id, username, email, phone, role
+    FROM User
+    WHERE role = 'admin'
+  `;
+
+  try {
+    const [rows] = await db.query(sql);
+    return res.json(rows || []);
+  } catch (err) {
+    console.error("Error fetching admins:", err.message);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// Middleware สำหรับเช็คสิทธิ์ด้านล่าง
+router.use(authRequired);
+
+function isSystemManager(req) {
+  return req.user && req.user.role === "system_manager";
+}
+
+function isAdmin(req) {
+  return req.user && req.user.role === "admin";
+}
+
+// ======================= 1) สร้างผู้ใช้ใหม่ =======================
+router.post("/users", async (req, res) => {
+  try {
+    const { username, password, email, phone, role } = req.body;
+
+    if (!isSystemManager(req)) {
+      return res.status(403).json({ error: "เฉพาะ system_manager เท่านั้นที่สามารถสร้างผู้ใช้ได้" });
+    }
+
+    if (!username || !password || !email || !phone) {
+      return res.status(400).json({ error: "ต้องกรอกข้อมูลให้ครบ" });
+    }
+
+    if (password.length < 8) {
+      return res.status(400).json({ error: "password ต้องยาวอย่างน้อย 8 ตัวอักษร" });
+    }
+
+    if (role && role !== "admin") {
+      return res.status(400).json({ error: 'system_manager สร้างได้เฉพาะ role = "admin" เท่านั้น' });
+    }
+    const newRole = "admin";
+
+    // เช็คซ้ำ
+    const checkSql = `SELECT user_id FROM User WHERE username = ? OR email = ? LIMIT 1`;
+    const [existing] = await db.query(checkSql, [username, email]);
+
+    if (existing.length > 0) {
+      return res.status(409).json({ error: "username หรือ email ถูกใช้แล้ว" });
+    }
+
+    const hashed = await bcrypt.hash(password, 12);
+    const insertSql = `
+      INSERT INTO User (username, password, email, phone, role)
+      VALUES (?, ?, ?, ?, ?)
+    `;
+    const [result] = await db.query(insertSql, [username, hashed, email, phone, newRole]);
+
+    return res.status(201).json({
+      message: "สร้างผู้ใช้สำเร็จ",
+      user: {
+        user_id: result.insertId,
+        username,
+        email,
+        phone,
+        role: newRole,
+      },
+    });
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
+  }
+});
+
+// ======================= 2) แก้ไขข้อมูลผู้ใช้ =======================
+router.put("/users/:user_id", async (req, res) => {
   const targetId = req.params.user_id;
-  const callerRole = req.user.role;
+  const { username, email, phone, role } = req.body;
 
-  const findSql = `SELECT user_id, role FROM User WHERE user_id = ?`;
-  db.get(findSql, [targetId], (err, existing) => {
-    if (err) return res.status(500).json({ error: err.message });
-    if (!existing)
-      return res.status(404).json({ error: "ไม่พบผู้ใช้ที่ต้องการลบ" });
+  try {
+    const findSql = `SELECT user_id, username, email, phone, role FROM User WHERE user_id = ?`;
+    const [rows] = await db.query(findSql, [targetId]);
+    
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "ไม่พบผู้ใช้ที่ต้องการแก้ไข" });
+    }
+    const existingUser = rows[0];
+    const targetRole = existingUser.role;
 
-    const targetRole = existing.role;
-
-    // admin ห้ามลบ admin หรือ system_manager
     if (isAdmin(req) && ["admin", "system_manager"].includes(targetRole)) {
-      return res.status(403).json({
-        error: "admin ไม่สามารถลบผู้ใช้ที่เป็น admin หรือ system_manager ได้",
-      });
+      return res.status(403).json({ error: "admin แก้ไขข้อมูลของ admin หรือ system_manager ไม่ได้" });
+    }
+    if (isAdmin(req) && role && ["admin", "system_manager"].includes(role)) {
+      return res.status(403).json({ error: "admin เปลี่ยน role เป็น admin/system_manager ไม่ได้" });
+    }
+
+    const fields = [];
+    const values = [];
+
+    if (username) { fields.push("username = ?"); values.push(username); }
+    if (email) { fields.push("email = ?"); values.push(email); }
+    if (phone) { fields.push("phone = ?"); values.push(phone); }
+    if (role) { fields.push("role = ?"); values.push(role); }
+
+    if (fields.length === 0) {
+      return res.status(400).json({ error: "ไม่มีข้อมูลที่ต้องการแก้ไข" });
+    }
+
+    values.push(targetId);
+    const updateSql = `UPDATE User SET ${fields.join(", ")} WHERE user_id = ?`;
+    await db.query(updateSql, values);
+
+    // Return updated data
+    const [updatedRows] = await db.query(
+      `SELECT user_id, username, email, phone, role FROM User WHERE user_id = ?`,
+      [targetId]
+    );
+
+    return res.json({
+      message: "แก้ไขข้อมูลสำเร็จ",
+      user: updatedRows[0],
+    });
+
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// ======================= 3) ลบผู้ใช้ =======================
+router.delete("/users/:user_id", async (req, res) => {
+  const targetId = req.params.user_id;
+
+  try {
+    const findSql = `SELECT user_id, role FROM User WHERE user_id = ?`;
+    const [rows] = await db.query(findSql, [targetId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "ไม่พบผู้ใช้ที่ต้องการลบ" });
+    }
+    const targetRole = rows[0].role;
+
+    if (isAdmin(req) && ["admin", "system_manager"].includes(targetRole)) {
+      return res.status(403).json({ error: "admin ไม่สามารถลบ admin หรือ system_manager ได้" });
     }
 
     const deleteSql = `DELETE FROM User WHERE user_id = ?`;
-    db.run(deleteSql, [targetId], function (err2) {
-      if (err2) return res.status(500).json({ error: err2.message });
+    const [result] = await db.query(deleteSql, [targetId]);
 
-      if (this.changes === 0) {
-        return res
-          .status(404)
-          .json({ error: "ไม่พบผู้ใช้ที่ต้องการลบ (หลังพยายามลบ)" });
-      }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "ไม่สามารถลบข้อมูลได้" });
+    }
 
-      return res.json({ message: "ลบผู้ใช้สำเร็จ" });
-    });
-  });
+    return res.json({ message: "ลบผู้ใช้สำเร็จ" });
+  } catch (err) {
+    return res.status(500).json({ error: err.message });
+  }
 });
 
 module.exports = router;
