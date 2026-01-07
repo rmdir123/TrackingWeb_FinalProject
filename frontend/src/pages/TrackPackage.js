@@ -35,14 +35,29 @@ function TrackPackage() {
     setPkg(null);
 
     try {
+      // 1. ดึง Token ออกมา (ต้องตรงกับชื่อที่คุณใช้ตอน localStorage.setItem)
+      const token = localStorage.getItem("token");
+
       const res = await axios.get(
-        `http://43.209.65.64:5000/api/v1/secure/packages/${searchId}`
+        `http://43.209.65.64:5000/api/v1/secure/packages/${searchId}`,
+        {
+          // 2. เพิ่ม Config ส่วน headers เข้าไป
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
       );
+
       const data = res.data.data || res.data;
       setPkg(data);
     } catch (err) {
       console.error(err);
-      setError("ไม่พบพัสดุ หรือเซิร์ฟเวอร์มีปัญหา");
+      // ถ้า Error status เป็น 401 อาจจะบอกว่า "กรุณาเข้าสู่ระบบใหม่"
+      if (err.response && err.response.status === 401) {
+        setError("เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่");
+      } else {
+        setError("ไม่พบพัสดุ หรือเซิร์ฟเวอร์มีปัญหา");
+      }
     } finally {
       setLoading(false);
     }
