@@ -35,37 +35,33 @@ function TrackPackage() {
     setPkg(null);
 
     try {
-      // 1. ดึง Token ออกมา (ต้องตรงกับชื่อที่คุณใช้ตอน localStorage.setItem)
+      // 1. เช็คว่ามีการ Login ไหม (ดึง token)
       const token = localStorage.getItem("token");
 
-      const res = await axios.get(
-        `http://43.209.65.64:5000/api/v1/secure/packages/${searchId}`,
-        {
-          // 2. เพิ่ม Config ส่วน headers เข้าไป
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // 2. เลือก URL และ Config ตามสถานะการ Login
+      const url = token
+        ? `http://43.209.65.64:5000/api/v1/secure/packages/${searchId}` // มี Token ใช้ Secure
+        : `http://43.209.65.64:5000/api/v1/packages/${searchId}`; // ไม่มีใช้ Public
+
+      const config = token
+        ? { headers: { Authorization: `Bearer ${token}` } }
+        : {};
+
+      // 3. ยิง Axios ด้วย URL และ Config ที่เลือก
+      const res = await axios.get(url, config);
 
       const data = res.data.data || res.data;
       setPkg(data);
     } catch (err) {
       console.error(err);
-      // ถ้า Error status เป็น 401 อาจจะบอกว่า "กรุณาเข้าสู่ระบบใหม่"
       if (err.response && err.response.status === 401) {
         setError("เซสชั่นหมดอายุ กรุณาเข้าสู่ระบบใหม่");
       } else {
-        setError("ไม่พบพัสดุ หรือเซิร์ฟเวอร์มีปัญหา");
+        setError("ไม่พบหมายเลขพัสดุนี้ในระบบ");
       }
     } finally {
       setLoading(false);
     }
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    handleSearch();
   };
 
   const handleBack = () => {
