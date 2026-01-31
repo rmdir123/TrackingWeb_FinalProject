@@ -96,7 +96,7 @@ function UserHistory() {
 
       // ลบจาก state ทันที
       setHistory((prev) =>
-        prev.filter((item) => item.history_id !== historyId)
+        prev.filter((item) => item.history_id !== historyId),
       );
     } catch (err) {
       console.error(err);
@@ -138,7 +138,12 @@ function UserHistory() {
           <div className="history-list-wrapper">
             <div className="history-list">
               {history.map((item) => (
-                <div key={item.history_id} className="history-item">
+                <div
+                  key={item.history_id}
+                  className="history-item"
+                  onClick={() => navigate(`/package/${item.package_id}/detail`)}
+                  style={{ cursor: "pointer" }}
+                >
                   {/* ⭐ กล่องรูปภาพพัสดุ ถ้ามี image_url */}
                   {item.image_url && (
                     <div className="history-image-wrapper">
@@ -193,7 +198,10 @@ function UserHistory() {
                     </span>
                     <button
                       className="history-delete-btn"
-                      onClick={() => handleDelete(item.history_id)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDelete(item.history_id);
+                      }}
                     >
                       ลบ
                     </button>

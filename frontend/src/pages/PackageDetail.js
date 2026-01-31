@@ -165,7 +165,10 @@ function PackageDetail() {
                   <div className="detail-subtitle">ผู้รับ :</div>
                   <div>{receiver_name}</div>
                   <div>
-                    ที่อยู่ผู้รับ : {address} {province}
+                    ที่อยู่ผู้รับ : {address} 
+                  </div>
+                  <div>
+                    จังหวัด : {province}
                   </div>
                   <div>รหัสไปรษณีย์ : {post_code}</div>
                   <div>เบอร์โทรศัพท์ผู้รับ : {receiver_tel}</div>
