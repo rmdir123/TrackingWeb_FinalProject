@@ -12,6 +12,10 @@ function ManagerHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // Robot Mode
+  const [robotMode, setRobotMode] = useState("");
+  const [modeLoading, setModeLoading] = useState(false);
+
   const [formMode, setFormMode] = useState(null); // "add" | "edit" | null
   const [formData, setFormData] = useState({
     user_id: null,
@@ -25,12 +29,43 @@ function ManagerHome() {
 
   const navigate = useNavigate();
 
+  const fetchRobotMode = async () => {
+    try {
+      const res = await axios.get(
+        "http://43.209.65.64:5000/api/v1/manager/robotmode",
+      );
+      setRobotMode(res.data.status?.toLowerCase());
+    } catch (err) {
+      console.error("โหลด robot mode ไม่สำเร็จ", err);
+    }
+  };
+
+  const handleChangeMode = async (mode) => {
+    if (mode === robotMode) return;
+
+    try {
+      setModeLoading(true);
+
+      await axios.put("http://43.209.65.64:5000/api/v1/manager/robotmode", {
+        status: mode,
+      });
+
+      setRobotMode(mode);
+    } catch (err) {
+      console.error("เปลี่ยน mode ไม่สำเร็จ", err);
+    } finally {
+      setModeLoading(false);
+    }
+  };
+
   // โหลดรายชื่อ admin ทั้งหมด (ไม่ต้อง auth)
   const fetchAdmins = async () => {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get("http://43.209.65.64:5000/api/v1/admin/admins");
+      const res = await axios.get(
+        "http://43.209.65.64:5000/api/v1/admin/admins",
+      );
       setAdmins(res.data || []);
     } catch (err) {
       console.error(err);
@@ -42,6 +77,7 @@ function ManagerHome() {
 
   useEffect(() => {
     fetchAdmins();
+    fetchRobotMode();
   }, []);
 
   // ---------- ฟอร์ม Add / Edit ----------
@@ -120,7 +156,7 @@ function ManagerHome() {
             password: formData.password,
             role: "admin", // system_manager สร้างได้เฉพาะ admin
           },
-          { headers }
+          { headers },
         );
       } else if (formMode === "edit") {
         if (!formData.user_id) {
@@ -137,7 +173,7 @@ function ManagerHome() {
             phone: formData.phone,
             role: "admin",
           },
-          { headers }
+          { headers },
         );
       }
 
@@ -167,7 +203,7 @@ function ManagerHome() {
       const headers = { Authorization: `Bearer ${token}` };
       await axios.delete(
         `http://43.209.65.64:5000/api/v1/admin/users/${admin.user_id}`,
-        { headers }
+        { headers },
       );
       await fetchAdmins();
     } catch (err) {
@@ -205,10 +241,7 @@ function ManagerHome() {
               >
                 start
               </button>
-              <button
-                className="btn-red"
-                onClick={() => console.log("stop")}
-              >
+              <button className="btn-red" onClick={() => console.log("stop")}>
                 stop
               </button>
             </div>
@@ -217,17 +250,24 @@ function ManagerHome() {
             <div className="manager-box">
               <h3>Sorting Mode</h3>
               <p>
-                Current : <span className="status-on">OCR</span>
+                Current :{" "}
+                <span className="status-on">
+                  {robotMode ? robotMode.toUpperCase() : "Loading..."}
+                </span>
               </p>
+
               <button
-                className="btn-green"
-                onClick={() => console.log("OCR")}
+                className={robotMode === "ocr" ? "btn-green" : "btn-gray"}
+                onClick={() => handleChangeMode("ocr")}
+                disabled={modeLoading}
               >
                 OCR
               </button>
+
               <button
-                className="btn-gray"
-                onClick={() => console.log("Material")}
+                className={robotMode === "material" ? "btn-green" : "btn-gray"}
+                onClick={() => handleChangeMode("material")}
+                disabled={modeLoading}
               >
                 Material
               </button>
@@ -437,8 +477,8 @@ function ManagerHome() {
                       {formSaving
                         ? "กำลังบันทึก..."
                         : formMode === "add"
-                        ? "เพิ่ม Admin"
-                        : "บันทึกการแก้ไข"}
+                          ? "เพิ่ม Admin"
+                          : "บันทึกการแก้ไข"}
                     </button>
                   </div>
                 </form>
