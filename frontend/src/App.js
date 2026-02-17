@@ -15,6 +15,7 @@ import ResetPassword from "./pages/ResetPassword";
 import AboutUs from "./pages/AboutUs";
 import AdminPackageEdit from "./pages/AdminPackageEdit";
 import ManagerHome from "./pages/ManagerHome";
+import SystemDashboard from "./pages/SystemDashboard";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
       <Route path="/aboutus" element={<AboutUs />} />
       <Route path="/admin/package/:id/edit" element={<AdminPackageEdit />} />
       <Route path="/manager_home" element={<ManagerHome />} />
+      <Route path="/systemdashboard" element={<SystemDashboard />} />
     </Routes>
   );
 }

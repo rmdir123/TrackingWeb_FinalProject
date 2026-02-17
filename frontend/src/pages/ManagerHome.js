@@ -285,10 +285,11 @@ function ManagerHome() {
               <button
                 type="button"
                 className="btn-nav"
-                // onClick={() => navigate("/")}
+                onClick={() => navigate("/systemdashboard")}
               >
                 System Dashboard
               </button>
+
               <button
                 type="button"
                 className="btn-nav"
