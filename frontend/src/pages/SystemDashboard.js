@@ -25,8 +25,8 @@ function SystemDashboard() {
   const fetchData = async () => {
     try {
       const [overviewRes, historyRes] = await Promise.all([
-        axios.get("http://localhost:5000/api/v1/aws/metrics/overview"),
-        axios.get("http://localhost:5000/api/v1/aws/metrics/history"),
+        axios.get("http://43.209.65.64:5000/api/v1/aws/metrics/overview"),
+        axios.get("http://43.209.65.64:5000/api/v1/aws/metrics/history"),
       ]);
 
       setOverview(overviewRes.data);
