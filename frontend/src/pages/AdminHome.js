@@ -1,20 +1,22 @@
 // src/pages/AdminHome.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import "./AdminHome.css";
-import "./TrackPackage.css"; // ⭐ ดึง style การ์ดจาก TrackPackage มาใช้ซ้ำ
+import "./TrackPackage.css";
 import bg from "../images/bg.png";
 import weblogo from "../images/weblogo.png";
 
 import Navbar from "../components/Navbar";
 
+const API_BASE = "http://43.209.65.64:5000/api/v1";
+
 // ฟอร์แมตวันที่-เวลา
 const formatDateTime = (dt) => {
   if (!dt) return "-";
   const d = new Date(dt);
-  if (Number.isNaN(d.getTime())) return dt; // ถ้า parse ไม่ได้ก็แสดงค่าดิบไปเลย
+  if (Number.isNaN(d.getTime())) return dt;
   return d.toLocaleString("th-TH", {
     dateStyle: "short",
     timeStyle: "short",
@@ -31,19 +33,48 @@ function AdminHome() {
   const [ocrFailPackages, setOcrFailPackages] = useState([]);
   const [ocrFailError, setOcrFailError] = useState("");
 
-  // 🔔 state สำหรับ Notification
   const [notification, setNotification] = useState(null);
   const [notificationError, setNotificationError] = useState("");
 
-  // ====== ฟังก์ชันดึงแจ้งเตือน OCR_Failure ตัวแรกที่ยังไม่ได้อ่าน ======
+  // =======================
+  // ⭐ ใช้ secure api ก่อนเข้า detail
+  // =======================
+  const handleViewDetail = async (packageId) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      const url = token
+        ? `${API_BASE}/secure/packages/${packageId}`
+        : `${API_BASE}/packages/${packageId}`;
+
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+
+      await axios.get(url, { headers });
+
+      // backend insert history แล้ว
+      navigate(`/package/${packageId}/detail`);
+    } catch (err) {
+      console.error(err);
+
+      if (err.response?.status === 401) {
+        alert("Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        navigate("/login");
+      } else {
+        alert("ไม่สามารถเปิดดูรายละเอียดได้");
+      }
+    }
+  };
+
+  // =======================
+  // Notification
+  // =======================
   async function fetchFirstUnreadNotification() {
     try {
       setNotificationError("");
-      const res = await axios.get(
-        "http://43.209.65.64:5000/api/v1/notifications?status=UNREAD"
-      );
+      const res = await axios.get(`${API_BASE}/notifications?status=UNREAD`);
 
-      // รองรับทั้งแบบ { data: [] } หรือ { notifications: [] }
       const list = res.data?.data || res.data?.notifications || [];
 
       if (Array.isArray(list) && list.length > 0) {
@@ -57,18 +88,16 @@ function AdminHome() {
     }
   }
 
-  // ดึงรายการพัสดุทั้งหมด (โชว์ปกติ)
   useEffect(() => {
     axios
-      .get("http://43.209.65.64:5000/api/v1/packages")
+      .get(`${API_BASE}/packages`)
       .then((res) => setPackages(res.data?.data || []))
       .catch((err) => console.error(err));
   }, []);
 
-  // ดึงรายการพัสดุ OCR_Fail
   useEffect(() => {
     axios
-      .get("http://43.209.65.64:5000/api/v1/package/ocrfail")
+      .get(`${API_BASE}/package/ocrfail`)
       .then((res) => {
         setOcrFailPackages(res.data?.data || []);
       })
@@ -78,19 +107,19 @@ function AdminHome() {
       });
   }, []);
 
-  // ดึง Notification ครั้งแรก
   useEffect(() => {
     fetchFirstUnreadNotification();
   }, []);
 
-  // ไม่ให้หน้า scroll (โค้ดเดิมของมึง)
   useEffect(() => {
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => (document.body.style.overflow = prev || "auto");
   }, []);
 
-  // ค้นหา package ตาม ID
+  // =======================
+  // Search
+  // =======================
   const handleSearch = async (e) => {
     e.preventDefault();
 
@@ -101,14 +130,11 @@ function AdminHome() {
       setSearchError("");
       setSearchResult(null);
 
-      // ดึง token จาก localStorage
       const token = localStorage.getItem("token");
 
-      // ถ้ามี token → ใช้ /secure/... + ส่ง Authorization
-      // ถ้าไม่มี token → ใช้ /packages/... ปกติ
       const url = token
-        ? `http://43.209.65.64:5000/api/v1/secure/packages/${id}`
-        : `http://43.209.65.64:5000/api/v1/packages/${id}`;
+        ? `${API_BASE}/secure/packages/${id}`
+        : `${API_BASE}/packages/${id}`;
 
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
@@ -137,14 +163,11 @@ function AdminHome() {
     setSearchError("");
   };
 
-  // 🔔 กดปุ่ม Close → mark READ แล้วโหลดตัวถัดไป
   const handleCloseNotification = async () => {
     if (!notification) return;
 
     try {
-      await axios.patch(
-        `http://43.209.65.64:5000/api/v1/notifications/${notification.id}/read`
-      );
+      await axios.patch(`${API_BASE}/notifications/${notification.id}/read`);
       await fetchFirstUnreadNotification();
     } catch (err) {
       console.error(err);
@@ -156,14 +179,13 @@ function AdminHome() {
     <div
       className="app"
       style={{
-        "--bg-image": "url('/images/bg.png')",
+        "--bg-image": `url(${bg})`,
       }}
     >
-      {/* NAVBAR */}
       <Navbar />
 
       <main className="content">
-        {/* 🔔 Toast แจ้งเตือน OCR Failure มุมขวาบน */}
+        {/* Notification */}
         {notification && (
           <div className="ocr-toast-container">
             <div className="ocr-popup">
@@ -181,13 +203,14 @@ function AdminHome() {
             </div>
           </div>
         )}
+
         {notificationError && (
           <p className="error-text" style={{ marginTop: "8px" }}>
             {notificationError}
           </p>
         )}
 
-        {/* SEARCH BOX (เหมือนเดิม) */}
+        {/* Search */}
         <form className="search-box-wrapper" onSubmit={handleSearch}>
           <input
             type="text"
@@ -198,10 +221,9 @@ function AdminHome() {
           />
         </form>
 
-        {/* RESULT ZONE */}
         {searchError && <p className="error-text">{searchError}</p>}
 
-        {/* ⭐ แสดงผลลัพธ์แบบการ์ดเหมือนหน้า TrackPackage */}
+        {/* Search Result */}
         {searchResult && (
           <div className="trackpage-result-shell">
             <button className="trackpage-back-btn" onClick={clearSearchResult}>
@@ -209,7 +231,6 @@ function AdminHome() {
             </button>
 
             <div className="trackpage-result-box">
-              {/* ซ้าย: รูป + ID */}
               <div className="trackpage-left">
                 <div className="trackpage-image-frame">
                   <img
@@ -229,46 +250,20 @@ function AdminHome() {
                 </div>
               </div>
 
-              {/* ขวา: รายละเอียด */}
               <div className="trackpage-right">
                 <div className="trackpage-status-row">
                   <span className="trackpage-status-label">
                     สถานะปัจจุบัน :
                   </span>
-
                   <span className="trackpage-status-value">
                     {searchResult.current_status || searchResult.status}
                   </span>
-
-                  <span className="trackpage-status-dot" />
-
-                  <span className="trackpage-status-note">
-                    {searchResult.status_note}
-                  </span>
-                </div>
-
-                {/* ผู้ส่ง */}
-                <div className="trackpage-section">
-                  <div className="trackpage-section-title">ผู้ส่ง :</div>
-                  <div>{searchResult.sender_name}</div>
-                  <div>เบอร์โทรศัพท์ผู้ส่ง : {searchResult.sender_tel}</div>
-                </div>
-
-                {/* ผู้รับ */}
-                <div className="trackpage-section">
-                  <div className="trackpage-section-title">ผู้รับ :</div>
-                  <div>{searchResult.receiver_name}</div>
-                  <div>ที่อยู่ผู้รับ : {searchResult.address}</div>
-                  <div>รหัสไปรษณีย์ : {searchResult.post_code}</div>
-                  <div>เบอร์โทรศัพท์ผู้รับ : {searchResult.receiver_tel}</div>
                 </div>
 
                 <div className="trackpage-detail-row">
                   <button
                     className="trackpage-detail-btn"
-                    onClick={() =>
-                      navigate(`/package/${searchResult.package_id}/detail`)
-                    }
+                    onClick={() => handleViewDetail(searchResult.package_id)}
                   >
                     รายละเอียดพัสดุ ⬇
                   </button>
@@ -278,7 +273,7 @@ function AdminHome() {
           </div>
         )}
 
-        {/* LIST ปกติด้านล่าง */}
+        {/* รายการพัสดุทั้งหมด */}
         <h2 className="subtitle">รายการพัสดุทั้งหมด</h2>
         <div className="packet-list-container">
           <ul className="packet-list">
@@ -286,10 +281,8 @@ function AdminHome() {
               <li
                 key={pkg.package_id}
                 className="packet-item"
-                onClick={() =>
-                  navigate(`/package/${pkg.package_id}/detail`)
-                }
-                style={{ cursor: "pointer" }} // ให้เมาส์เป็นรูปมือเวลา hover
+                onClick={() => handleViewDetail(pkg.package_id)}
+                style={{ cursor: "pointer" }}
               >
                 <div className="left-box">
                   {pkg.package_img && (
@@ -333,6 +326,7 @@ function AdminHome() {
                   <th>แก้ไข</th>
                 </tr>
               </thead>
+
               <tbody className="ocr-table-body">
                 {ocrFailPackages.map((pkg) => (
                   <tr key={pkg.package_id}>
@@ -340,15 +334,16 @@ function AdminHome() {
                     <td>{pkg.sender_name}</td>
                     <td>{pkg.receiver_name}</td>
                     <td>{formatDateTime(pkg.created_time)}</td>
+
                     <td
                       className={
                         pkg.status === "OCR_Fail"
                           ? "status-badge status-fail"
                           : pkg.status === "OCR_Update"
-                          ? "status-badge status-update"
-                          : pkg.status === "Return_Package"
-                          ? "status-badge status-return"
-                          : "status-badge"
+                            ? "status-badge status-update"
+                            : pkg.status === "Return_Package"
+                              ? "status-badge status-return"
+                              : "status-badge"
                       }
                     >
                       {pkg.status}

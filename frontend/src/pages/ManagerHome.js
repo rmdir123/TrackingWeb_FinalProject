@@ -278,7 +278,7 @@ function ManagerHome() {
               <button
                 type="button"
                 className="btn-nav"
-                // onClick={() => navigate("/")}
+                onClick={() => navigate("/packagedashboard")}
               >
                 Package Dashboard
               </button>
@@ -293,9 +293,9 @@ function ManagerHome() {
               <button
                 type="button"
                 className="btn-nav"
-                // onClick={() => navigate("/")}
+                onClick={() => navigate("/editedpackages")}
               >
-                View Edited Package
+                Edited Packages
               </button>
             </div>
           </div>

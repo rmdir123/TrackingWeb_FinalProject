@@ -16,6 +16,8 @@ import AboutUs from "./pages/AboutUs";
 import AdminPackageEdit from "./pages/AdminPackageEdit";
 import ManagerHome from "./pages/ManagerHome";
 import SystemDashboard from "./pages/SystemDashboard";
+import PackageDashboard from "./pages/PackageDashboard";
+import EditedPackages from "./pages/EditedPackages";
 
 function App() {
   return (
@@ -35,6 +37,9 @@ function App() {
       <Route path="/admin/package/:id/edit" element={<AdminPackageEdit />} />
       <Route path="/manager_home" element={<ManagerHome />} />
       <Route path="/systemdashboard" element={<SystemDashboard />} />
+      <Route path="/packagedashboard" element={<PackageDashboard />} />
+      <Route path="/editedpackages" element={<EditedPackages />} />
+
     </Routes>
   );
 }

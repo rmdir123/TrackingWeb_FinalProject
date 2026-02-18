@@ -13,6 +13,7 @@ const notificationRoutes = require("./routes/notification_route");
 const adminUserRoute = require("./routes/admin_user_route");
 const managerRoute = require("./routes/manager_route.js");
 const awsMetricsRoute = require("./routes/aws_metrics_route");
+const packageDashboardRoutes = require("./routes/package_dashboard_routes");
 
 
 
@@ -41,6 +42,7 @@ app.use('/api/v1/notifications', notificationRoutes); // notifications
 app.use('/api/v1/admin', adminUserRoute); // admin user management
 app.use('/api/v1/manager', managerRoute); // manager control center
 app.use('/api/v1/aws', awsMetricsRoute); // AWS CloudWatch metrics
+app.use("/api/v1/package-dashboard", packageDashboardRoutes); // package dashboard
 
 
 app.use('/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); // swagger

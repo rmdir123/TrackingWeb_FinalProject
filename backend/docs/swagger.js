@@ -12,7 +12,7 @@ const options = {
     },
     servers: [
       {
-        url: 'http://localhost:5000',
+        url: 'http://43.209.65.64:5000',
         description: 'Local server',
       },
     ],
