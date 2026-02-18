@@ -171,7 +171,7 @@ function AdminPackageEdit() {
     ocr_result,
     created_time,
     updated_time,
-    height,
+    length,
     width,
     package_img,
   } = pkg;
@@ -300,8 +300,8 @@ function AdminPackageEdit() {
                     <span>{width ? `${width} cm` : "-"}</span>
                   </div>
                   <div className="admin-edit-info-row">
-                    <span>ความสูง :</span>
-                    <span>{height ? `${height} cm` : "-"}</span>
+                    <span>ความยาว :</span>
+                    <span>{length ? `${length} cm` : "-"}</span>
                   </div>
                   <div className="admin-edit-info-row">
                     <span>ชนิดวัสดุ :</span>

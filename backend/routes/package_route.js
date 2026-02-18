@@ -25,7 +25,7 @@ const router = express.Router();
  *         package_id:
  *           type: integer
  *           example: 101
- *         height:
+ *         length:
  *           type: number
  *           nullable: true
  *           example: 12
@@ -100,7 +100,7 @@ const router = express.Router();
  *     AddPackageRequest:
  *       type: object
  *       properties:
- *         height:
+ *         length:
  *           type: number
  *           example: 12
  *         width:
@@ -198,7 +198,7 @@ const router = express.Router();
  *           examples:
  *             default:
  *               value:
- *                 height: 12
+ *                 length: 12
  *                 width: 25
  *                 sender_name: "สมชาย"
  *                 receiver_name: "สมหญิง"
@@ -564,7 +564,7 @@ function s(v) {
 // เพิ่มพัสดุใหม่
 router.post('/addpackage', async (req, res) => {
   const {
-    height, width, sender_name, receiver_name, sender_tel, receiver_tel,
+    length, width, sender_name, receiver_name, sender_tel, receiver_tel,
     address, status, material_type, province, post_code,
     ocr_result, package_img, modify_by
   } = req.body || {};
@@ -574,7 +574,7 @@ router.post('/addpackage', async (req, res) => {
 
   const sql = `
     INSERT INTO Package (
-      height, width, sender_name, receiver_name, sender_tel, receiver_tel,
+      length, width, sender_name, receiver_name, sender_tel, receiver_tel,
       address, status, material_type, province, post_code,
       fragile, ocr_result, created_time, updated_time, package_img, modify_by
     )
@@ -582,7 +582,7 @@ router.post('/addpackage', async (req, res) => {
   `;
 
   const params = [
-    n(height), n(width), s(sender_name), s(receiver_name), s(sender_tel), s(receiver_tel),
+    n(length), n(width), s(sender_name), s(receiver_name), s(sender_tel), s(receiver_tel),
     s(address), s(status), s(material_type), s(province), s(post_code),
     s(ocr_result), now, now, s(package_img), (modify_by ?? null)
   ];
@@ -592,7 +592,7 @@ router.post('/addpackage', async (req, res) => {
     const newId = result.insertId;
 
     const selectSql = `
-      SELECT package_id, height, width, sender_name, receiver_name,
+      SELECT package_id, length, width, sender_name, receiver_name,
              sender_tel, receiver_tel, address, status, material_type,
              province, post_code, fragile, ocr_result,
              created_time, updated_time, package_img, modify_by
@@ -615,7 +615,7 @@ router.get('/packages', async (req, res) => {
 
   // MySQL: ใช้ created_time ตรงๆ ไม่ต้อง datetime()
   const sql = `
-    SELECT package_id, height, width, sender_name, receiver_name,
+    SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
            created_time, updated_time, package_img, modify_by
@@ -647,7 +647,7 @@ router.get('/package/ocrfail', async (req, res) => {
   const order = (req.query.order || 'desc').toLowerCase() === 'asc' ? 'ASC' : 'DESC';
 
   const sql = `
-    SELECT package_id, height, width, sender_name, receiver_name,
+    SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
            created_time, updated_time, package_img, modify_by
@@ -683,7 +683,7 @@ router.get('/package/ocrfail', async (req, res) => {
 router.get('/packages/edited', authRequired, requireRole('system_manager'), async (req, res) => {
   // MySQL: ใช้ modify_by IS NOT NULL ก็พอ (หรือ check empty string ด้วยก็ได้)
   const sql = `
-    SELECT package_id, height, width, sender_name, receiver_name,
+    SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
            created_time, updated_time, package_img, modify_by
@@ -705,7 +705,7 @@ router.get('/packages/:id', async (req, res) => {
   if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid id' });
 
   const sql = `
-    SELECT package_id, height, width, sender_name, receiver_name,
+    SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
            created_time, updated_time, package_img, modify_by
@@ -772,7 +772,7 @@ router.get('/secure/packages/:id', authRequired, async (req, res) => {
   if (!Number.isFinite(id)) return res.status(400).json({ error: 'Invalid id' });
 
   const sql = `
-    SELECT package_id, height, width, sender_name, receiver_name,
+    SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
            created_time, updated_time, package_img, modify_by

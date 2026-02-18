@@ -98,7 +98,7 @@ function PackageDetail() {
     ocr_result,
     created_time,
     updated_time,
-    height,
+    length,
     width,
     package_img,
   } = pkg;
@@ -201,8 +201,8 @@ function PackageDetail() {
                   <span>{width ? `${width} cm` : "-"}</span>
                 </div>
                 <div className="detail-meta-row">
-                  <span>ความสูง :</span>
-                  <span>{height ? `${height} cm` : "-"}</span>
+                  <span>ความยาว :</span>
+                  <span>{length ? `${length} cm` : "-"}</span>
                 </div>
 
                 <div className="detail-meta-row">

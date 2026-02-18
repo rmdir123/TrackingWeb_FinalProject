@@ -3,7 +3,7 @@ const mysql = require('mysql2');
 require('dotenv').config(); // มั่นใจว่าโหลดค่าจาก .env แล้ว
 
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'db-web.c52q2wqa6rvh.ap-southeast-7.rds.amazonaws.com',
+  host: process.env.DB_HOST || 'db-web-private.c52q2wqa6rvh.ap-southeast-7.rds.amazonaws.com',
   user: process.env.DB_USER || 'admin',
   password: process.env.DB_PASSWORD || 'zaza10250',
   database: process.env.DB_NAME || 'webdb',
