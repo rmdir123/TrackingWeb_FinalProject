@@ -98,7 +98,7 @@ router.get("/metrics/overview", async (req, res) => {
       getMetric({
         Namespace: "AWS/RDS",
         MetricName: "CPUUtilization",
-        Dimensions: [{ Name: "DBInstanceIdentifier", Value: "db-web" }],
+        Dimensions: [{ Name: "DBInstanceIdentifier", Value: "db-web-private" }],
         StartTime: oneHourAgo,
         EndTime: now,
         Period: 300,
@@ -107,7 +107,7 @@ router.get("/metrics/overview", async (req, res) => {
       getMetric({
         Namespace: "AWS/RDS",
         MetricName: "DatabaseConnections",
-        Dimensions: [{ Name: "DBInstanceIdentifier", Value: "db-web" }],
+        Dimensions: [{ Name: "DBInstanceIdentifier", Value: "db-web-private" }],
         StartTime: oneHourAgo,
         EndTime: now,
         Period: 300,
@@ -116,7 +116,7 @@ router.get("/metrics/overview", async (req, res) => {
       getMetric({
         Namespace: "AWS/RDS",
         MetricName: "FreeStorageSpace",
-        Dimensions: [{ Name: "DBInstanceIdentifier", Value: "db-web" }],
+        Dimensions: [{ Name: "DBInstanceIdentifier", Value: "db-web-private" }],
         StartTime: oneHourAgo,
         EndTime: now,
         Period: 300,
