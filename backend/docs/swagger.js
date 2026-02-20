@@ -12,8 +12,8 @@ const options = {
     },
     servers: [
       {
-        url: 'http://43.209.65.64:5000',
-        description: 'Local server',
+        url: 'https://trackingweb.online/api',
+        description: 'Production server',
       },
     ],
 

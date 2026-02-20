@@ -35,7 +35,7 @@ function UserInfo() {
       try {
         setError("");
         const res = await axios.get(
-          "http://43.209.65.64:5000/api/v1/userinfo/me",
+          "/api/v1/userinfo/me",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -87,7 +87,7 @@ function UserInfo() {
 
       // ❗ ส่งเฉพาะ field ที่แก้ได้ = phone
       await axios.put(
-        "http://43.209.65.64:5000/api/v1/userinfo/me",
+        "/api/v1/userinfo/me",
         {
           phone: form.phone,
         },

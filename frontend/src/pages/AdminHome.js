@@ -10,7 +10,7 @@ import weblogo from "../images/weblogo.png";
 
 import Navbar from "../components/Navbar";
 
-const API_BASE = "http://43.209.65.64:5000/api/v1";
+const API_BASE = "/api/v1";
 
 // ฟอร์แมตวันที่-เวลา
 const formatDateTime = (dt) => {

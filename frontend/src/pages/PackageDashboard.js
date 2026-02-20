@@ -24,10 +24,10 @@ function PackageDashboard() {
     try {
       const [regionRes, statusRes] = await Promise.all([
         axios.get(
-          "http://43.209.65.64:5000/api/v1/package-dashboard/region-summary",
+          "/api/v1/package-dashboard/region-summary",
         ),
         axios.get(
-          "http://43.209.65.64:5000/api/v1/package-dashboard/status-summary",
+          "/api/v1/package-dashboard/status-summary",
         ),
       ]);
 

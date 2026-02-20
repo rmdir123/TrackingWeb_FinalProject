@@ -32,7 +32,7 @@ function ManagerHome() {
   const fetchRobotMode = async () => {
     try {
       const res = await axios.get(
-        "http://43.209.65.64:5000/api/v1/manager/robotmode",
+        "/api/v1/manager/robotmode",
       );
       setRobotMode(res.data.status?.toLowerCase());
     } catch (err) {
@@ -46,7 +46,7 @@ function ManagerHome() {
     try {
       setModeLoading(true);
 
-      await axios.put("http://43.209.65.64:5000/api/v1/manager/robotmode", {
+      await axios.put("/api/v1/manager/robotmode", {
         status: mode,
       });
 
@@ -64,7 +64,7 @@ function ManagerHome() {
       setLoading(true);
       setError("");
       const res = await axios.get(
-        "http://43.209.65.64:5000/api/v1/admin/admins",
+        "/api/v1/admin/admins",
       );
       setAdmins(res.data || []);
     } catch (err) {
@@ -148,7 +148,7 @@ function ManagerHome() {
         }
 
         await axios.post(
-          "http://43.209.65.64:5000/api/v1/admin/users",
+          "/api/v1/admin/users",
           {
             username: formData.username,
             email: formData.email,
@@ -166,7 +166,7 @@ function ManagerHome() {
         }
 
         await axios.put(
-          `http://43.209.65.64:5000/api/v1/admin/users/${formData.user_id}`,
+          `/api/v1/admin/users/${formData.user_id}`,
           {
             username: formData.username,
             email: formData.email,
@@ -202,7 +202,7 @@ function ManagerHome() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       await axios.delete(
-        `http://43.209.65.64:5000/api/v1/admin/users/${admin.user_id}`,
+        `/api/v1/admin/users/${admin.user_id}`,
         { headers },
       );
       await fetchAdmins();

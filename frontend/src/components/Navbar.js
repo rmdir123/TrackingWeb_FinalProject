@@ -20,7 +20,7 @@ function Navbar() {
     }
 
     try {
-      const res = await fetch("http://43.209.65.64:5000/api/v1/auth/me", {
+      const res = await fetch("/api/v1/auth/me", {
         method: "GET",
         headers: {
           Authorization: `Bearer ${token}`,

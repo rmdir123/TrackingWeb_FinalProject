@@ -9,7 +9,7 @@ import bg from "../images/bg.png";
 import Navbar from "../components/Navbar";
 
 // แก้ URL ให้ตรงกับ Swagger ของมึง
-const LOGIN_URL = "http://43.209.65.64:5000/api/v1/auth/login";
+const LOGIN_URL = "/api/v1/auth/login";
 
 function UserLogin() {
   const navigate = useNavigate();

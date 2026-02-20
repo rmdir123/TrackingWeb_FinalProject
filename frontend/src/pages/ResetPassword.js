@@ -8,7 +8,7 @@ import "./ResetPassword.css";
 import bg from "../images/bg.png";
 import Navbar from "../components/Navbar";
 
-const API_BASE = "http://43.209.65.64:5000/api/v1/auth";
+const API_BASE = "/api/v1/auth";
 
 function ResetPassword() {
   const navigate = useNavigate();

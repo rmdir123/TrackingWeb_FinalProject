@@ -40,8 +40,8 @@ function TrackPackage() {
       
       // 2. เลือก URL และ Config ตามสถานะการ Login
       const url = token 
-        ? `http://43.209.65.64:5000/api/v1/secure/packages/${searchId}`  // มี Token ใช้ Secure
-        : `http://43.209.65.64:5000/api/v1/packages/${searchId}`;         // ไม่มีใช้ Public
+        ? `/api/v1/secure/packages/${searchId}`  // มี Token ใช้ Secure
+        : `/api/v1/packages/${searchId}`;         // ไม่มีใช้ Public
       
       const config = token 
         ? { headers: { Authorization: `Bearer ${token}` } } 
