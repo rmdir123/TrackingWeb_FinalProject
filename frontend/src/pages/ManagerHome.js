@@ -105,7 +105,18 @@ function ManagerHome() {
     }
   };
 
+  pc.oniceconnectionstatechange = () => {
+    console.log("ICE state:", pc.iceConnectionState);
+  };
+
+  pc.onicecandidate = (event) => {
+  if (event.candidate) {
+    console.log("Candidate:", event.candidate.candidate);
+  }
+};
+
   socket.on("offer", async (offer) => {
+    console.log("✅ Received offer");
     await pc.setRemoteDescription(offer);
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);

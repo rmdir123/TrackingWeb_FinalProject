@@ -34,8 +34,19 @@ export default function CameraSender() {
       }
     };
 
+    pc.onicecandidate = (event) => {
+        if (event.candidate) {
+            console.log("Candidate:", event.candidate.candidate);
+        }
+        };
+
+    pc.oniceconnectionstatechange = () => {
+        console.log("ICE state:", pc.iceConnectionState);
+    };
+
     socket.on("answer", async (answer) => {
-      await pc.setRemoteDescription(answer);
+        console.log("✅ Received answer");
+        await pc.setRemoteDescription(answer);
     });
 
     socket.on("ice-candidate", async (candidate) => {
