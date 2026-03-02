@@ -1,16 +1,21 @@
 // src/pages/ManagerHome.js
-import React, { useEffect, useState } from "react";
+import { io } from "socket.io-client";
 import axios from "axios";
 import "./ManagerHome.css";
 import bg from "../images/bg.png";
 import Navbar from "../components/Navbar";
 import weblogo from "../images/weblogo.png";
 import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState, useRef } from "react";
+
 
 function ManagerHome() {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const videoRef = useRef(null);
+  const socket = io("https://parcelweb.store");
+  const room = "live-room";
 
   // Robot Mode
   const [robotMode, setRobotMode] = useState("");
@@ -79,6 +84,35 @@ function ManagerHome() {
     fetchAdmins();
     fetchRobotMode();
   }, []);
+
+  useEffect(() => {
+  const pc = new RTCPeerConnection({
+    iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+  });
+
+  socket.emit("join-room", room);
+
+  pc.ontrack = (event) => {
+    if (videoRef.current) {
+      videoRef.current.srcObject = event.streams[0];
+    }
+  };
+
+  socket.on("offer", async (offer) => {
+    await pc.setRemoteDescription(offer);
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+    socket.emit("answer", { room, answer });
+  });
+
+  socket.on("ice-candidate", async (candidate) => {
+    await pc.addIceCandidate(candidate);
+  });
+
+  return () => {
+    pc.close();
+  };
+}, []);
 
   // ---------- ฟอร์ม Add / Edit ----------
   const openAddForm = () => {
@@ -305,9 +339,14 @@ function ManagerHome() {
             <div className="manager-livecam">
               <h3>Live Camera</h3>
               <div className="livecam-frame">
-                {/* ตอนนี้ยังใช้โลโก้แทนภาพกล้องจริง */}
-                <img src={weblogo} alt="Live Camera" />
-              </div>
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                muted
+                style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              />
+            </div>
             </div>
           </div>
         </div>

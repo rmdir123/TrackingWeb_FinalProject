@@ -12,7 +12,7 @@ const options = {
     },
     servers: [
       {
-        url: 'https://trackingweb.online/api',
+        url: 'https://parcelweb.store/api',
         description: 'Production server',
       },
     ],
