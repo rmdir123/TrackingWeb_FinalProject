@@ -18,6 +18,7 @@ import ManagerHome from "./pages/ManagerHome";
 import SystemDashboard from "./pages/SystemDashboard";
 import PackageDashboard from "./pages/PackageDashboard";
 import EditedPackages from "./pages/EditedPackages";
+import CameraSender from "./pages/CameraSender";
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
       <Route path="/systemdashboard" element={<SystemDashboard />} />
       <Route path="/packagedashboard" element={<PackageDashboard />} />
       <Route path="/editedpackages" element={<EditedPackages />} />
+      <Route path="/camera" element={<CameraSender />} />
 
     </Routes>
   );
