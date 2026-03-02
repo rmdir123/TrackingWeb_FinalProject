@@ -91,8 +91,8 @@ function ManagerHome() {
     { urls: "stun:stun.l.google.com:19302" },
     {
       urls: "turn:43.209.65.64:3478",
-      username: "user",
-      credential: "trackingwebsecret"
+      username: "nat",
+      credential: "nat123"
     }
   ]
 });
