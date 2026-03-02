@@ -9,10 +9,15 @@ export default function CameraSender() {
 
   useEffect(() => {
     const pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" }
-      ]
-    });
+  iceServers: [
+    { urls: "stun:stun.l.google.com:19302" },
+    {
+      urls: "turn:43.209.65.64:3478",
+      username: "user",
+      credential: "trackingwebsecret"
+    }
+  ]
+});
 
     socket.emit("join-room", room);
 
