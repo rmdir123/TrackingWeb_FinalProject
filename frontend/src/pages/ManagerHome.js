@@ -14,8 +14,6 @@ function ManagerHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const videoRef = useRef(null);
-  const socket = io("https://parcelweb.store");
-  const room = "live-room";
 
   // Robot Mode
   const [robotMode, setRobotMode] = useState("");
@@ -86,50 +84,60 @@ function ManagerHome() {
   }, []);
 
   useEffect(() => {
+  const socket = io("https://parcelweb.store");
+  const room = "live-room";
+
   const pc = new RTCPeerConnection({
-  iceServers: [
-    { urls: "stun:stun.l.google.com:19302" },
-    {
-      urls: "turn:43.209.65.64:3478",
-      username: "nat",
-      credential: "nat123"
-    }
-  ]
-});
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      {
+        urls: "turn:43.209.65.64:3478",
+        username: "nat",
+        credential: "nat123"
+      }
+    ]
+  });
 
   socket.emit("join-room", room);
 
+  // รับ video track
   pc.ontrack = (event) => {
     if (videoRef.current) {
       videoRef.current.srcObject = event.streams[0];
     }
   };
 
+  // ดู ICE state
   pc.oniceconnectionstatechange = () => {
     console.log("ICE state:", pc.iceConnectionState);
   };
 
-  pc.onicecandidate = (event) => {
-  if (event.candidate) {
-    console.log("Candidate:", event.candidate.candidate);
-  }
-};
-
-  socket.on("offer", async (offer) => {
-    console.log("✅ Received offer");
-    await pc.setRemoteDescription(offer);
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    socket.emit("answer", { room, answer });
+  // รับ candidate จาก sender
+  socket.on("ice-candidate", async (candidate) => {
+    try {
+      await pc.addIceCandidate(candidate);
+    } catch (err) {
+      console.error("Error adding ICE candidate:", err);
+    }
   });
 
-  socket.on("ice-candidate", async (candidate) => {
-    await pc.addIceCandidate(candidate);
+  // รับ offer
+  socket.on("offer", async (offer) => {
+    console.log("✅ Received offer");
+
+    await pc.setRemoteDescription(offer);
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    socket.emit("answer", { room, answer });
   });
 
   return () => {
     pc.close();
+    socket.disconnect();
   };
+
 }, []);
 
   // ---------- ฟอร์ม Add / Edit ----------
