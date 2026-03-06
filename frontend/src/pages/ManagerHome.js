@@ -61,6 +61,15 @@ function ManagerHome() {
     }
   };
 
+  const startConveyor = () => {
+  socket.emit("conveyor-start");
+};
+
+const stopConveyor = () => {
+  socket.emit("conveyor-stop");
+};
+
+
   // โหลดรายชื่อ admin ทั้งหมด (ไม่ต้อง auth)
   const fetchAdmins = async () => {
     try {
@@ -295,13 +304,11 @@ function ManagerHome() {
               <p>
                 Current : <span className="status-on">on</span>
               </p>
-              <button
-                className="btn-green"
-                onClick={() => console.log("start")}
-              >
+              <button className="btn-green" onClick={startConveyor}>
                 start
               </button>
-              <button className="btn-red" onClick={() => console.log("stop")}>
+
+              <button className="btn-red" onClick={stopConveyor}>
                 stop
               </button>
             </div>

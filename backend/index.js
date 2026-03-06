@@ -17,6 +17,7 @@ const adminUserRoute = require("./routes/admin_user_route");
 const managerRoute = require("./routes/manager_route.js");
 const awsMetricsRoute = require("./routes/aws_metrics_route");
 const packageDashboardRoutes = require("./routes/package_dashboard_routes");
+const conveyorRoutes = require("./routes/conveyorRoutes");
 
 const { swaggerUi, swaggerSpec } = require("./docs/swagger");
 
@@ -48,6 +49,7 @@ app.use("/api/v1/admin", adminUserRoute);
 app.use("/api/v1/manager", managerRoute);
 app.use("/api/v1/aws", awsMetricsRoute);
 app.use("/api/v1/package-dashboard", packageDashboardRoutes);
+app.use("/api/v1/conveyor", conveyorRoutes);
 
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
@@ -78,6 +80,19 @@ io.on("connection", (socket) => {
     socket.join(room);
     console.log(`Socket ${socket.id} joined room: ${room}`);
   });
+
+  socket.on("conveyor-start", () => {
+  console.log("Start conveyor command");
+
+    io.emit("run-conveyor");
+  });
+
+  socket.on("conveyor-stop", () => {
+    console.log("Stop conveyor command");
+
+    io.emit("stop-conveyor");
+  });
+
 
   socket.on("offer", ({ room, offer }) => {
     socket.to(room).emit("offer", offer);
