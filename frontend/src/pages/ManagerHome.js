@@ -14,7 +14,7 @@ function ManagerHome() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const videoRef = useRef(null);
-
+  const socketRef = useRef(null);
   // Robot Mode
   const [robotMode, setRobotMode] = useState("");
   const [modeLoading, setModeLoading] = useState(false);
@@ -62,13 +62,16 @@ function ManagerHome() {
   };
 
   const startConveyor = () => {
-  socket.emit("conveyor-start");
-};
+    if (socketRef.current) {
+      socketRef.current.emit("conveyor-start");
+    }
+  };
 
-const stopConveyor = () => {
-  socket.emit("conveyor-stop");
-};
-
+  const stopConveyor = () => {
+    if (socketRef.current) {
+      socketRef.current.emit("conveyor-stop");
+    }
+  };
 
   // โหลดรายชื่อ admin ทั้งหมด (ไม่ต้อง auth)
   const fetchAdmins = async () => {
@@ -93,7 +96,11 @@ const stopConveyor = () => {
   }, []);
 
   useEffect(() => {
-  const socket = io("https://parcelweb.store");
+
+  socketRef.current = io("https://parcelweb.store");
+
+  const socket = socketRef.current;
+
   const room = "live-room";
 
   const pc = new RTCPeerConnection({
