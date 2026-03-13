@@ -566,7 +566,7 @@ router.post('/addpackage', async (req, res) => {
   const {
     length, width, sender_name, receiver_name, sender_tel, receiver_tel,
     address, status, material_type, province, post_code,
-    ocr_result, package_img, modify_by, location
+    ocr_result, package_img, modify_by, location, epc
   } = req.body || {};
 
   // MySQL ใช้ NOW() ได้ แต่ส่งค่าไปเลยก็สะดวกเหมือนกัน
