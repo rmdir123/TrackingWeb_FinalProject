@@ -36,20 +36,20 @@ function TrackPackage() {
 
     try {
       // 1. เช็คว่ามีการ Login ไหม (ดึง token)
-      const token = localStorage.getItem('token');
-      
+      const token = localStorage.getItem("token");
+
       // 2. เลือก URL และ Config ตามสถานะการ Login
-      const url = token 
-        ? `/api/v1/secure/packages/${searchId}`  // มี Token ใช้ Secure
-        : `/api/v1/packages/${searchId}`;         // ไม่มีใช้ Public
-      
-      const config = token 
-        ? { headers: { Authorization: `Bearer ${token}` } } 
+      const url = token
+        ? `/api/v1/secure/packages/${searchId}` // มี Token ใช้ Secure
+        : `/api/v1/packages/${searchId}`; // ไม่มีใช้ Public
+
+      const config = token
+        ? { headers: { Authorization: `Bearer ${token}` } }
         : {};
 
       // 3. ยิง Axios ด้วย URL และ Config ที่เลือก
       const res = await axios.get(url, config);
-      
+
       const data = res.data.data || res.data;
       setPkg(data);
     } catch (err) {
@@ -159,6 +159,32 @@ function TrackPackage() {
                     {pkg.status_note}
                   </span>
                 </div>
+
+                <div className="trackpage-status-row">
+                  <span className="trackpage-status-label">
+                    สถานะปัจจุบัน :
+                  </span>
+
+                  <span className="trackpage-status-value">
+                    {pkg.current_status || pkg.status}
+                  </span>
+
+                  <span className="trackpage-status-dot" />
+
+                  <span className="trackpage-status-note">
+                    {pkg.status_note}
+                  </span>
+                </div>
+
+                {/* เพิ่ม location */}
+                {pkg.location && (
+                  <div className="trackpage-section">
+                    <div className="trackpage-section-title">
+                      สถานที่ล่าสุด :
+                    </div>
+                    <div>{pkg.location}</div>
+                  </div>
+                )}
 
                 {/* ผู้ส่ง */}
                 <div className="trackpage-section">

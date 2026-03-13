@@ -185,6 +185,13 @@ function UserHistory() {
                     </div>
 
                     <div className="history-row">
+                      <span className="history-label">สถานที่</span>
+                      <span className="history-value">
+                        {item.location || "-"}
+                      </span>
+                    </div>
+
+                    <div className="history-row">
                       <span className="history-label">ปลายทาง</span>
                       <span className="history-value">
                         {item.province || "-"} {item.post_code || ""}

@@ -211,7 +211,8 @@ router.get('/history', requireAuth, async (req, res) => {
       p.status,
       p.province,
       p.post_code,
-      p.package_img AS image_url  
+      p.package_img AS image_url,
+      p.location  
     FROM History h
     LEFT JOIN Package p ON h.package_id = p.package_id
     WHERE h.user_id = ?

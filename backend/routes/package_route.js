@@ -566,7 +566,7 @@ router.post('/addpackage', async (req, res) => {
   const {
     length, width, sender_name, receiver_name, sender_tel, receiver_tel,
     address, status, material_type, province, post_code,
-    ocr_result, package_img, modify_by
+    ocr_result, package_img, modify_by, location
   } = req.body || {};
 
   // MySQL ใช้ NOW() ได้ แต่ส่งค่าไปเลยก็สะดวกเหมือนกัน
@@ -576,15 +576,15 @@ router.post('/addpackage', async (req, res) => {
     INSERT INTO Package (
       length, width, sender_name, receiver_name, sender_tel, receiver_tel,
       address, status, material_type, province, post_code,
-      fragile, ocr_result, created_time, updated_time, package_img, modify_by
+      fragile, ocr_result, created_time, updated_time, package_img, modify_by, epc, location
     )
-    VALUES (?,?,?,?,?,?,?,?,?,?,?, 0, ?, ?, ?, ?, ?)
+    VALUES (?,?,?,?,?,?,?,?,?,?,?, 0, ?, ?, ?, ?, ?, ?, ?)
   `;
 
   const params = [
     n(length), n(width), s(sender_name), s(receiver_name), s(sender_tel), s(receiver_tel),
     s(address), s(status), s(material_type), s(province), s(post_code),
-    s(ocr_result), now, now, s(package_img), (modify_by ?? null)
+    s(ocr_result), now, now, s(package_img), (modify_by ?? null), s(epc), s(location)
   ];
 
   try {
@@ -595,7 +595,7 @@ router.post('/addpackage', async (req, res) => {
       SELECT package_id, length, width, sender_name, receiver_name,
              sender_tel, receiver_tel, address, status, material_type,
              province, post_code, fragile, ocr_result,
-             created_time, updated_time, package_img, modify_by
+             created_time, updated_time, package_img, modify_by, epc, location
       FROM Package
       WHERE package_id = ?
     `;
@@ -618,7 +618,7 @@ router.get('/packages', async (req, res) => {
     SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
-           created_time, updated_time, package_img, modify_by
+           created_time, updated_time, package_img, modify_by, epc, location
     FROM Package
     ORDER BY created_time ${order}
     LIMIT ? OFFSET ?
@@ -650,7 +650,7 @@ router.get('/package/ocrfail', async (req, res) => {
     SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
-           created_time, updated_time, package_img, modify_by
+           created_time, updated_time, package_img, modify_by, epc, location
     FROM Package
     WHERE status IN ('OCR_Fail', 'OCR_Update', 'Return_Package')
     ORDER BY created_time ${order}
@@ -686,7 +686,7 @@ router.get('/packages/edited', authRequired, requireRole('system_manager'), asyn
     SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
-           created_time, updated_time, package_img, modify_by
+           created_time, updated_time, package_img, modify_by, epc, location
     FROM Package
     WHERE modify_by IS NOT NULL 
     ORDER BY COALESCE(updated_time, created_time) DESC
@@ -708,7 +708,7 @@ router.get('/packages/:id', async (req, res) => {
     SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
-           created_time, updated_time, package_img, modify_by
+           created_time, updated_time, package_img, modify_by, epc, location
     FROM Package
     WHERE package_id = ?
   `;
@@ -775,7 +775,7 @@ router.get('/secure/packages/:id', authRequired, async (req, res) => {
     SELECT package_id, length, width, sender_name, receiver_name,
            sender_tel, receiver_tel, address, status, material_type,
            province, post_code, fragile, ocr_result,
-           created_time, updated_time, package_img, modify_by
+           created_time, updated_time, package_img, modify_by, epc, location
     FROM Package
     WHERE package_id = ?
   `;
