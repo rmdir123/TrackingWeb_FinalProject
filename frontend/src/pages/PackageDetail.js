@@ -219,7 +219,7 @@ function PackageDetail() {
               </div>
             </div>
             <div>สถานที่ : {location || "-"}</div>
-            <div>EPD : {epc || "-"}</div>
+            <div>EPC : {epc || "-"}</div>
 
             {/* ❌ เอาปุ่มด้านล่างออกแล้ว ตามที่ขอ */}
           </div>

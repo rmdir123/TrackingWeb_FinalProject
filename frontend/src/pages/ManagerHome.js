@@ -8,7 +8,6 @@ import weblogo from "../images/weblogo.png";
 import { useNavigate } from "react-router-dom";
 import React, { useEffect, useState, useRef } from "react";
 
-
 function ManagerHome() {
   const [admins, setAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -18,6 +17,7 @@ function ManagerHome() {
   // Robot Mode
   const [robotMode, setRobotMode] = useState("");
   const [modeLoading, setModeLoading] = useState(false);
+  const [conveyorStatus, setConveyorStatus] = useState("off"); // off | on
 
   const [formMode, setFormMode] = useState(null); // "add" | "edit" | null
   const [formData, setFormData] = useState({
@@ -34,9 +34,7 @@ function ManagerHome() {
 
   const fetchRobotMode = async () => {
     try {
-      const res = await axios.get(
-        "/api/v1/manager/robotmode",
-      );
+      const res = await axios.get("/api/v1/manager/robotmode");
       setRobotMode(res.data.status?.toLowerCase());
     } catch (err) {
       console.error("โหลด robot mode ไม่สำเร็จ", err);
@@ -64,12 +62,14 @@ function ManagerHome() {
   const startConveyor = () => {
     if (socketRef.current) {
       socketRef.current.emit("conveyor-start");
+      setConveyorStatus("on"); // ✅ เพิ่ม
     }
   };
 
   const stopConveyor = () => {
     if (socketRef.current) {
       socketRef.current.emit("conveyor-stop");
+      setConveyorStatus("off"); // ✅ เพิ่ม
     }
   };
 
@@ -78,9 +78,7 @@ function ManagerHome() {
     try {
       setLoading(true);
       setError("");
-      const res = await axios.get(
-        "/api/v1/admin/admins",
-      );
+      const res = await axios.get("/api/v1/admin/admins");
       setAdmins(res.data || []);
     } catch (err) {
       console.error(err);
@@ -96,65 +94,63 @@ function ManagerHome() {
   }, []);
 
   useEffect(() => {
+    socketRef.current = io("https://parcelweb.store");
 
-  socketRef.current = io("https://parcelweb.store");
+    const socket = socketRef.current;
 
-  const socket = socketRef.current;
+    const room = "live-room";
 
-  const room = "live-room";
+    const pc = new RTCPeerConnection({
+      iceServers: [
+        { urls: "stun:stun.l.google.com:19302" },
+        {
+          urls: "turn:43.209.65.64:3478",
+          username: "nat",
+          credential: "nat123",
+        },
+      ],
+    });
 
-  const pc = new RTCPeerConnection({
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      {
-        urls: "turn:43.209.65.64:3478",
-        username: "nat",
-        credential: "nat123"
+    socket.emit("join-room", room);
+
+    // รับ video track
+    pc.ontrack = (event) => {
+      if (videoRef.current) {
+        videoRef.current.srcObject = event.streams[0];
       }
-    ]
-  });
+    };
 
-  socket.emit("join-room", room);
+    // ดู ICE state
+    pc.oniceconnectionstatechange = () => {
+      console.log("ICE state:", pc.iceConnectionState);
+    };
 
-  // รับ video track
-  pc.ontrack = (event) => {
-    if (videoRef.current) {
-      videoRef.current.srcObject = event.streams[0];
-    }
-  };
+    // รับ candidate จาก sender
+    socket.on("ice-candidate", async (candidate) => {
+      try {
+        await pc.addIceCandidate(candidate);
+      } catch (err) {
+        console.error("Error adding ICE candidate:", err);
+      }
+    });
 
-  // ดู ICE state
-  pc.oniceconnectionstatechange = () => {
-    console.log("ICE state:", pc.iceConnectionState);
-  };
+    // รับ offer
+    socket.on("offer", async (offer) => {
+      console.log("✅ Received offer");
 
-  // รับ candidate จาก sender
-  socket.on("ice-candidate", async (candidate) => {
-    try {
-      await pc.addIceCandidate(candidate);
-    } catch (err) {
-      console.error("Error adding ICE candidate:", err);
-    }
-  });
+      await pc.setRemoteDescription(offer);
 
-  // รับ offer
-  socket.on("offer", async (offer) => {
-    console.log("✅ Received offer");
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
 
-    await pc.setRemoteDescription(offer);
+      socket.emit("answer", { room, answer });
+    });
 
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-
-    socket.emit("answer", { room, answer });
-  });
-
-  return () => {
-    pc.close();
-    socket.disconnect();
-  };
-
-}, []);
+    return () => {
+      pc.close();
+      socket.disconnect();
+    };
+  }, []);
 
   // ---------- ฟอร์ม Add / Edit ----------
   const openAddForm = () => {
@@ -277,10 +273,7 @@ function ManagerHome() {
 
     try {
       const headers = { Authorization: `Bearer ${token}` };
-      await axios.delete(
-        `/api/v1/admin/users/${admin.user_id}`,
-        { headers },
-      );
+      await axios.delete(`/api/v1/admin/users/${admin.user_id}`, { headers });
       await fetchAdmins();
     } catch (err) {
       console.error(err);
@@ -309,7 +302,14 @@ function ManagerHome() {
             <div className="manager-box">
               <h3>Conveyor Belt</h3>
               <p>
-                Current : <span className="status-on">on</span>
+                Current :{" "}
+                <span
+                  className={
+                    conveyorStatus === "on" ? "status-on" : "status-off"
+                  }
+                >
+                  {conveyorStatus}
+                </span>
               </p>
               <button className="btn-green" onClick={startConveyor}>
                 start
@@ -379,14 +379,14 @@ function ManagerHome() {
             <div className="manager-livecam">
               <h3>Live Camera</h3>
               <div className="livecam-frame">
-              <video
-                ref={videoRef}
-                autoPlay
-                playsInline
-                muted
-                style={{ width: "100%", height: "100%", objectFit: "cover" }}
-              />
-            </div>
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </div>
             </div>
           </div>
         </div>

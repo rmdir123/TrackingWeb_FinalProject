@@ -722,15 +722,22 @@ router.get('/packages/:id', async (req, res) => {
   }
 });
 
-// Update Package (OCR Edit Page)
 router.put("/packages/:id", authRequired, async (req, res) => {
   const { id } = req.params;
   const {
-    sender_name, receiver_name, sender_tel, receiver_tel, address, status,
+    sender_name, receiver_name, sender_tel, receiver_tel,
+    address, status, post_code, province
   } = req.body;
+
   const modify_by = req.user.user_id;
 
-  // MySQL ใช้ NOW() แทน datetime('now')
+  // ✅ validation
+  if (!post_code || !province) {
+    return res.status(400).json({
+      message: "post_code and province are required"
+    });
+  }
+
   const sql = `
     UPDATE Package
     SET
@@ -740,17 +747,29 @@ router.put("/packages/:id", authRequired, async (req, res) => {
       receiver_tel  = ?,
       address       = ?,
       status        = ?,
+      post_code     = ?,   -- เพิ่มตรงนี้
+      province      = ?,   -- เพิ่มตรงนี้
       modify_by     = ?,       
       updated_time  = NOW()
     WHERE package_id = ?;
   `;
 
   const params = [
-    sender_name, receiver_name, sender_tel, receiver_tel, address, status, modify_by, id,
+    sender_name,
+    receiver_name,
+    sender_tel,
+    receiver_tel,
+    address,
+    status,
+    post_code,     // เพิ่ม
+    province,      // เพิ่ม
+    modify_by,
+    id,
   ];
 
   try {
     const [result] = await db.query(sql, params);
+
     if (result.affectedRows === 0) {
       return res.status(404).json({ message: "Package not found" });
     }
@@ -760,6 +779,7 @@ router.put("/packages/:id", authRequired, async (req, res) => {
       package_id: id,
       modify_by: modify_by,
     });
+
   } catch (err) {
     console.error("DB error:", err);
     return res.status(500).json({ message: "Database error" });

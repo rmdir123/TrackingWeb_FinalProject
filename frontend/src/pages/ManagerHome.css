@@ -355,3 +355,13 @@ html, body {
 .btn-nav:hover {
   filter: brightness(1.15);
 }
+
+
+.status-off {
+  background: #9ca3af;
+  padding: 2px 8px;
+  border-radius: 8px;
+  color: black;
+  font-size: 13px;
+  font-weight: 600;
+}
