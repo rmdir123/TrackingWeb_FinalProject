@@ -137,7 +137,7 @@ function TrackPackage() {
                     {pkg.current_status || pkg.status}
                   </span>
 
-                  <span className="trackpage-status-dot" />
+                  
 
                   <span className="trackpage-status-note">{pkg.status_note}</span>
                 </div>
