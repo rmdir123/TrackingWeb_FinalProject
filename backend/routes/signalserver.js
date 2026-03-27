@@ -9,21 +9,34 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("User connected");
+  console.log("✅ User connected:", socket.id);
 
-  socket.on("offer", (offer) => {
-    socket.broadcast.emit("offer", offer);
+  // ✅ เพิ่ม join-room handler
+  socket.on("join-room", (room) => {
+    socket.join(room);
+    console.log(`${socket.id} joined room: ${room}`);
   });
 
-  socket.on("answer", (answer) => {
-    socket.broadcast.emit("answer", answer);
+  // ✅ destructure { room, offer } แล้วส่งแค่ offer ไปยัง room
+  socket.on("offer", ({ room, offer }) => {
+    socket.to(room).emit("offer", offer);
   });
 
-  socket.on("ice-candidate", (candidate) => {
-    socket.broadcast.emit("ice-candidate", candidate);
+  // ✅ destructure { room, answer } แล้วส่งแค่ answer
+  socket.on("answer", ({ room, answer }) => {
+    socket.to(room).emit("answer", answer);
+  });
+
+  // ✅ destructure { room, candidate } แล้วส่งแค่ candidate
+  socket.on("ice-candidate", ({ room, candidate }) => {
+    socket.to(room).emit("ice-candidate", candidate);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("❌ User disconnected:", socket.id);
   });
 });
 
 server.listen(5000, () => {
-  console.log("Signaling server running");
+  console.log("🚀 Signaling server running on port 5000");
 });

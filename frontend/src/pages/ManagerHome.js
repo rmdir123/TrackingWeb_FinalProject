@@ -94,63 +94,78 @@ function ManagerHome() {
   }, []);
 
   useEffect(() => {
-    socketRef.current = io("https://parcelweb.store");
+  socketRef.current = io("https://parcelweb.store");
+  const socket = socketRef.current;
+  const room = "live-room";
 
-    const socket = socketRef.current;
+  const pc = new RTCPeerConnection({
+    iceServers: [
+      { urls: "stun:stun.l.google.com:19302" },
+      {
+        urls: "turn:43.209.65.64:3478",
+        username: "nat",
+        credential: "nat123",
+      },
+    ],
+  });
 
-    const room = "live-room";
+  // ✅ buffer สำหรับ candidate ที่มาก่อน remote description
+  const pendingCandidates = [];
 
-    const pc = new RTCPeerConnection({
-      iceServers: [
-        { urls: "stun:stun.l.google.com:19302" },
-        {
-          urls: "turn:43.209.65.64:3478",
-          username: "nat",
-          credential: "nat123",
-        },
-      ],
-    });
+  socket.emit("join-room", room);
 
-    socket.emit("join-room", room);
+  pc.ontrack = (event) => {
+    if (videoRef.current) {
+      videoRef.current.srcObject = event.streams[0];
+    }
+  };
 
-    // รับ video track
-    pc.ontrack = (event) => {
-      if (videoRef.current) {
-        videoRef.current.srcObject = event.streams[0];
-      }
-    };
+  pc.oniceconnectionstatechange = () => {
+    console.log("ICE state:", pc.iceConnectionState);
+  };
 
-    // ดู ICE state
-    pc.oniceconnectionstatechange = () => {
-      console.log("ICE state:", pc.iceConnectionState);
-    };
-
-    // รับ candidate จาก sender
-    socket.on("ice-candidate", async (candidate) => {
+  // ✅ รับ candidate → ถ้ายังไม่มี remoteDescription ให้พักไว้ก่อน
+  socket.on("ice-candidate", async (candidate) => {
+    if (pc.remoteDescription) {
       try {
         await pc.addIceCandidate(candidate);
       } catch (err) {
         console.error("Error adding ICE candidate:", err);
       }
-    });
+    } else {
+      pendingCandidates.push(candidate);
+    }
+  });
 
-    // รับ offer
-    socket.on("offer", async (offer) => {
-      console.log("✅ Received offer");
-
+  // ✅ รับ offer → set remote desc → สร้าง answer → flush pending candidates
+  socket.on("offer", async (offer) => {
+    console.log("✅ Received offer");
+    try {
       await pc.setRemoteDescription(offer);
 
       const answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
-
       socket.emit("answer", { room, answer });
-    });
 
-    return () => {
-      pc.close();
-      socket.disconnect();
-    };
-  }, []);
+      // flush candidates ที่รอไว้
+      for (const candidate of pendingCandidates) {
+        try {
+          await pc.addIceCandidate(candidate);
+        } catch (err) {
+          console.error("Error adding buffered candidate:", err);
+        }
+      }
+      pendingCandidates.length = 0;
+    } catch (err) {
+      console.error("Error handling offer:", err);
+    }
+  });
+
+  return () => {
+    pc.close();
+    socket.disconnect();
+  };
+}, []);
 
   // ---------- ฟอร์ม Add / Edit ----------
   const openAddForm = () => {

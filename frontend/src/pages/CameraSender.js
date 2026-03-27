@@ -23,22 +23,22 @@ export default function CameraSender() {
 
     const start = async () => {
       try {
-        // 1️⃣ เปิดกล้องก่อน
+        
         const stream = await navigator.mediaDevices.getUserMedia({ video: true });
 
         videoRef.current.srcObject = stream;
 
-        // 2️⃣ addTrack ก่อนเสมอ
+        
         stream.getTracks().forEach(track => {
           pc.addTrack(track, stream);
         });
 
-        // 3️⃣ ดู ICE state
+        
         pc.oniceconnectionstatechange = () => {
           console.log("ICE state:", pc.iceConnectionState);
         };
 
-        // 4️⃣ ดู candidate
+        
         pc.onicecandidate = (event) => {
           if (event.candidate) {
             console.log("Candidate:", event.candidate.candidate);
@@ -48,7 +48,7 @@ export default function CameraSender() {
           }
         };
 
-        // 5️⃣ ค่อย createOffer หลังมี track แล้ว
+        
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
 
