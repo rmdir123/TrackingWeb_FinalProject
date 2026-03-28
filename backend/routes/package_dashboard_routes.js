@@ -30,7 +30,7 @@ const db = require("../db");
  *           type: integer
  *           example: 85
  *
- *     ErrorResponse:
+ *     DashboardErrorResponse::
  *       type: object
  *       properties:
  *         error:
@@ -70,7 +70,7 @@ const db = require("../db");
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/DashboardErrorResponse:'
  */
 router.get("/region-summary", async (req, res) => {
   try {
@@ -121,7 +121,7 @@ router.get("/region-summary", async (req, res) => {
  *         content:
  *           application/json:
  *             schema:
- *               $ref: '#/components/schemas/ErrorResponse'
+ *               $ref: '#/components/schemas/DashboardErrorResponse:'
  */
 router.get("/status-summary", async (req, res) => {
   try {
